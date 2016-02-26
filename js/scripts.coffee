@@ -33,6 +33,8 @@
 	$(document).ready () ->
 		searchFixedWidth = 690
 		$("[data-search]").css("width", searchFixedWidth)
+		$("[data-search]").css("height", searchFixedWidth)
+		$("[data-search]").focus()
 		$(document).on "keyup input", "[data-search]", (e) -> 
 			# Make this input not "has-search"
 			$(this).closest(".search").removeClass "has-searched"
@@ -40,6 +42,7 @@
 			if $(this).val().length is 0
 				$(this).stop().animate(
 					width: searchFixedWidth
+					height: searchFixedWidth
 				,
 					duration: 200
 				)
@@ -52,6 +55,7 @@
 				$span.css("display", "")
 				$(this).stop()
 				$(this).css("width", $inputSize)
+				$(this).css("height", $inputSize)
 
 	# Input search
 	$(document).on "keydown", "[data-search]", (event) -> 
@@ -59,11 +63,17 @@
 			val = $(this).val()
 			# Search
 			search val, () ->
-				$("[data-search]").closest(".search").addClass "has-searched"
+				$("[data-search]").blur()
+	$(document)
+		.on "focus", "[data-search]", () ->
+			$(this).closest(".search").removeClass "has-searched"
+		.on "blur", "[data-search]", () ->
+			$(this).closest(".search").addClass "has-searched"
+
 
 	# Search and render result
 	search = (query, callback) -> 
-		settings = "type=video&maxResults=5&order=relevance"
+		settings = "type=video&maxResults=50&order=relevance" #(maxResults = 8)
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=#{query}&#{settings}&key=#{apiKey}"
 			#url: "https://www.googleapis.com/youtube/v3/videos/getRating?id=6xIRT0huiuA&access_token=#{accessToken}"
@@ -71,7 +81,7 @@
 			success: (data) ->
 				items = data.items
 				# console.log items # For testing
-				videoList = {} # This array will be populated with videos
+				videoList = [] # This array will be populated with videos
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
@@ -79,9 +89,22 @@
 						dataType: "jsonp"
 						success: (data) -> 
 							# Add video to list
-							videoList[val.id.videoId] = data.items[0]
+							videoList.push(data.items[0])
+							# Create video position
+							pos = 
+								state: false
+								values: 
+									top: 
+										current: 0
+										to: 0
+									left: 
+										current: -1000
+										to: 0
+							MoveTo.add(pos)
+							videoPositions[val.id.videoId] = pos
+
 							# If this is the last result, run function that uses the videos
-							if Object.keys(videoList).length is items.length
+							if videoList.length is items.length
 								useVideos(videoList)
 								# Run callback
 								callback()
@@ -99,35 +122,59 @@
 				}
 
 				# Calculate new data
-				videos[index].custom.likeRatio = item.statistics.likeCount / item.statistics.dislikeCount
+				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )
 
-				## Render item
-				# Get template
-				template = $('[data-template="video-item"]').html()
-				# Insert data
-				output = Mustache.render(template, item)
-				# Render output
-				$container.append output
+			# Sort before rendering
+			sortVideos = (a, b) ->
+				return (b.custom.likeRatio - a.custom.likeRatio)
+			videos.sort(sortVideos)
+
+			# Render
+			data = 
+				videos: videos
+			# Get template
+			template = $('[data-template="video-item"]').html()
+			# Insert data
+			output = Mustache.render(template, data)
+			# Render output
+			$container.append output
 
 	## End search function
 
 	# Video thumbnail click
 	$("body").on "click", ".video-item", () -> 
+		# Get video id
+		videoId = $(this).data("videoid");
+
 		# Show video instead of image
-		$(".video-item").removeClass("active")
-		$(this).addClass("active")
+		$(".video-item")
+			.removeClass("active")
+			.css("z-index", "")
+		$(this)
+			.addClass("active started-video")
+			.css("z-index", 4000)
+
+		# Add youtube embed iframe 
+		if $(this).find(".video-item-video").length is 0
+			$iframe = $("<iframe/>",
+						src: "https://www.youtube.com/embed/#{videoId}"
+						frameborder: 0
+						allowfullscreen: true
+						class: "video-item-video"
+					)
+		$(this).find(".video-item-thumbnail").after $iframe
+
+		# Set this state
+		$(this).attr("data-state", "fullscreen")
 
 		# Show other ui
-		$("body").addClass("state-fullscreen");
+		$("body").addClass("state-fullscreen")
 
 		# Populate comment ui with comments
-		videoId = $(this).data("videoid");
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
-				# For testing
-				console.log data
 				## Set next page token
 				if data.nextPageToken
 					commentsNextPageToken = data.nextPageToken
@@ -148,7 +195,11 @@
 	# Close fullscreen
 	$(document).on "click", ".close-fullscreen", () ->
 		$(".video-item").removeClass("active")
-		$("body").removeClass("state-fullscreen");
+		$("body").removeClass("state-fullscreen")
+		# Set current item z-index
+		$('.video-item[data-state="fullscreen"]').css("z-index", 2000)
+		# Set this state to normal
+		$(".video-item").attr("data-state", false)
 
 	# Load more comments
 	$(document).on "click", ".more-comments:not(.disabled)", () ->
@@ -184,17 +235,45 @@
 					.text("Load more comments")
 					.removeClass("disabled")
 
-	# Function to position videos
-	setInterval () ->
-		top = 0
+	## Function to position videos
+
+	# All positions with index
+	videoPositions = {}
+
+	# Position video each frame
+	MoveTo.addFrame () -> 
+		# Loop through all items
+		newTop = 0
+		newLeft = 0
+		newLeftCount = 0
 		$(".video-item").each () ->
 			$this = $(this)
-			if !$this.hasClass("active")
-				$this.css "top", top
-				top += $this.height()
+			videoId = $this.data("videoid")
+			pos = videoPositions[videoId]
+			if $this.attr("data-state") is "fullscreen"
+				## Position for fullscreen
+				pos.values.top.to = $(".items").scrollTop()
+				pos.values.left.to = 0
 			else
-				$this.css "top", 0
-	, 1000/60
+				## Position for normal position
+				# Set new top position to move towards
+				pos.values.top.to = newTop
+				pos.values.left.to = newLeft
+
+			# Add new left
+			newLeft += $(window).width() * 0.25
+			# If left is more than a number, then add on height
+			if newLeftCount is 3
+				newLeft = 0
+				newTop += $(window).width() * 0.25 * 0.5625
+				newLeftCount = 0
+			else
+				newLeftCount++
+			# Position element
+			$this.css
+				top: pos.values.top.current
+				left: pos.values.left.current
+	## End frame
 
 	# Notes
 	# dislikes = item.statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")

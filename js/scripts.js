@@ -27,19 +27,22 @@
     	else
     		 * We have token! :D
      */
-    var apiKey, commentsNextPageToken, search;
+    var apiKey, commentsNextPageToken, search, videoPositions;
     apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI";
     commentsNextPageToken = false;
     $(document).ready(function() {
       var searchFixedWidth;
       searchFixedWidth = 690;
       $("[data-search]").css("width", searchFixedWidth);
+      $("[data-search]").css("height", searchFixedWidth);
+      $("[data-search]").focus();
       return $(document).on("keyup input", "[data-search]", function(e) {
         var $inputSize, $span;
         $(this).closest(".search").removeClass("has-searched");
         if ($(this).val().length === 0) {
           return $(this).stop().animate({
-            width: searchFixedWidth
+            width: searchFixedWidth,
+            height: searchFixedWidth
           }, {
             duration: 200
           });
@@ -50,7 +53,8 @@
           $inputSize = $span.outerWidth();
           $span.css("display", "");
           $(this).stop();
-          return $(this).css("width", $inputSize);
+          $(this).css("width", $inputSize);
+          return $(this).css("height", $inputSize);
         }
       });
     });
@@ -59,27 +63,48 @@
       if (event.which === 13) {
         val = $(this).val();
         return search(val, function() {
-          return $("[data-search]").closest(".search").addClass("has-searched");
+          return $("[data-search]").blur();
         });
       }
     });
+    $(document).on("focus", "[data-search]", function() {
+      return $(this).closest(".search").removeClass("has-searched");
+    }).on("blur", "[data-search]", function() {
+      return $(this).closest(".search").addClass("has-searched");
+    });
     search = function(query, callback) {
       var settings, useVideos;
-      settings = "type=video&maxResults=5&order=relevance";
+      settings = "type=video&maxResults=50&order=relevance";
       $.ajax({
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var items, videoList;
           items = data.items;
-          videoList = {};
+          videoList = [];
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
               dataType: "jsonp",
               success: function(data) {
-                videoList[val.id.videoId] = data.items[0];
-                if (Object.keys(videoList).length === items.length) {
+                var pos;
+                videoList.push(data.items[0]);
+                pos = {
+                  state: false,
+                  values: {
+                    top: {
+                      current: 0,
+                      to: 0
+                    },
+                    left: {
+                      current: -1000,
+                      to: 0
+                    }
+                  }
+                };
+                MoveTo.add(pos);
+                videoPositions[val.id.videoId] = pos;
+                if (videoList.length === items.length) {
                   useVideos(videoList);
                   return callback();
                 }
@@ -89,34 +114,49 @@
         }
       });
       return useVideos = function(videos) {
-        var $container;
+        var $container, data, output, sortVideos, template;
         console.log(videos);
         $container = $(".items");
         $container.html("");
-        return $.each(videos, function(index, item) {
-          var output, template;
+        $.each(videos, function(index, item) {
           videos[index].custom = {
             likeRatio: null
           };
-          videos[index].custom.likeRatio = item.statistics.likeCount / item.statistics.dislikeCount;
-          template = $('[data-template="video-item"]').html();
-          output = Mustache.render(template, item);
-          return $container.append(output);
+          return videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
         });
+        sortVideos = function(a, b) {
+          return b.custom.likeRatio - a.custom.likeRatio;
+        };
+        videos.sort(sortVideos);
+        data = {
+          videos: videos
+        };
+        template = $('[data-template="video-item"]').html();
+        output = Mustache.render(template, data);
+        return $container.append(output);
       };
     };
     $("body").on("click", ".video-item", function() {
-      var videoId;
-      $(".video-item").removeClass("active");
-      $(this).addClass("active");
-      $("body").addClass("state-fullscreen");
+      var $iframe, videoId;
       videoId = $(this).data("videoid");
+      $(".video-item").removeClass("active").css("z-index", "");
+      $(this).addClass("active started-video").css("z-index", 4000);
+      if ($(this).find(".video-item-video").length === 0) {
+        $iframe = $("<iframe/>", {
+          src: "https://www.youtube.com/embed/" + videoId,
+          frameborder: 0,
+          allowfullscreen: true,
+          "class": "video-item-video"
+        });
+      }
+      $(this).find(".video-item-thumbnail").after($iframe);
+      $(this).attr("data-state", "fullscreen");
+      $("body").addClass("state-fullscreen");
       return $.ajax({
         url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var comments, output, template;
-          console.log(data);
           if (data.nextPageToken) {
             commentsNextPageToken = data.nextPageToken;
           } else {
@@ -134,7 +174,9 @@
     });
     $(document).on("click", ".close-fullscreen", function() {
       $(".video-item").removeClass("active");
-      return $("body").removeClass("state-fullscreen");
+      $("body").removeClass("state-fullscreen");
+      $('.video-item[data-state="fullscreen"]').css("z-index", 2000);
+      return $(".video-item").attr("data-state", false);
     });
     $(document).on("click", ".more-comments:not(.disabled)", function() {
       var $this, videoId;
@@ -164,20 +206,38 @@
         }
       });
     });
-    return setInterval(function() {
-      var top;
-      top = 0;
+    videoPositions = {};
+    return MoveTo.addFrame(function() {
+      var newLeft, newLeftCount, newTop;
+      newTop = 0;
+      newLeft = 0;
+      newLeftCount = 0;
       return $(".video-item").each(function() {
-        var $this;
+        var $this, pos, videoId;
         $this = $(this);
-        if (!$this.hasClass("active")) {
-          $this.css("top", top);
-          return top += $this.height();
+        videoId = $this.data("videoid");
+        pos = videoPositions[videoId];
+        if ($this.attr("data-state") === "fullscreen") {
+          pos.values.top.to = $(".items").scrollTop();
+          pos.values.left.to = 0;
         } else {
-          return $this.css("top", 0);
+          pos.values.top.to = newTop;
+          pos.values.left.to = newLeft;
         }
+        newLeft += $(window).width() * 0.25;
+        if (newLeftCount === 3) {
+          newLeft = 0;
+          newTop += $(window).width() * 0.25 * 0.5625;
+          newLeftCount = 0;
+        } else {
+          newLeftCount++;
+        }
+        return $this.css({
+          top: pos.values.top.current,
+          left: pos.values.left.current
+        });
       });
-    }, 1000 / 60);
+    });
 
     /*
      */

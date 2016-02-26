@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"/>
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
   <script type="text/javascript" src="js/mustache.js"></script>
+  <script type="text/javascript" src="js/requestanimframe.js"></script>
+  <script type="text/javascript" src="js/moveto.js"></script>
   <script type="text/javascript" src="js/scripts.js"></script>
 </head>
 <body>
@@ -22,18 +24,17 @@
   </div>
   <div class="close-fullscreen"></div>
   <div class="info-ui"></div>
-  <template data-template="video-item">
+  <template data-template="video-item">{{#videos}}
     <div data-videoid="{{id}}" class="video-item">
-      <div style="background-image: url({{snippet.thumbnails.standard.url}});" class="video-item-thumbnail"></div>
-      <iframe src="https://www.youtube.com/embed/{{id}}" frameborder="0" allowfullscreen="allowfullscreen" class="video-item-video"></iframe>
+      <div style="background-image: url({{snippet.thumbnails.high.url}});" class="video-item-thumbnail"></div>
       <div class="video-item-ui">
         <h2 class="video-item-heading">{{snippet.title}}</h2>
         <p>Likes: {{statistics.likeCount}}</p>
         <p>Dislikes: {{statistics.dislikeCount}}</p>
         <p>Comments: {{statistics.commentCount}}</p>
-        <p>Like/Dislike ratio: {{custom.likeRatio}}</p>
+        <p>Like/Dislike ratio: {{custom.likeRatio}} times more likes than dislikes.</p>
       </div>
-    </div>
+    </div>{{/videos}}
   </template>
   <template data-template="comments">{{#items}}
     <div class="comment-item"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});" class="comment-profile"></a>

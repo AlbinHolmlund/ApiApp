@@ -16,6 +16,10 @@ head
 	//- MustacheJS
 	script(type="text/javascript", src="js/mustache.js")
 
+	//- MoveTo (My own animation plugin script)
+	script(type="text/javascript", src="js/requestanimframe.js")
+	script(type="text/javascript", src="js/moveto.js")
+
 	//- Custom scripts
 	script(type="text/javascript", src="js/scripts.js")
 body
@@ -40,18 +44,18 @@ body
 	
 	//- Templates
 	template(data-template="video-item")
+		{{#videos}}
 		.video-item(data-videoid="{{id}}")
 			//- Thumbnail
-			.video-item-thumbnail(style="background-image: url({{snippet.thumbnails.standard.url}});")
-			//- Video
-			iframe.video-item-video(src="https://www.youtube.com/embed/{{id}}", frameborder=0, allowfullscreen=true)
+			.video-item-thumbnail(style="background-image: url({{snippet.thumbnails.high.url}});")
 			//- Info
 			.video-item-ui
 				h2.video-item-heading {{snippet.title}}
 				p Likes: {{statistics.likeCount}}
 				p Dislikes: {{statistics.dislikeCount}}
 				p Comments: {{statistics.commentCount}}
-				p Like/Dislike ratio: {{custom.likeRatio}}
+				p Like/Dislike ratio: {{custom.likeRatio}} times more likes than dislikes.
+		{{/videos}}
 
 	//- Comments
 	template(data-template="comments")
