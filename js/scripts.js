@@ -60,6 +60,9 @@
     });
     $(document).on("keydown", "[data-search]", function(event) {
       var val;
+      if (event.which === 27) {
+        $(this).blur();
+      }
       if (event.which === 13) {
         val = $(this).val();
         return search(val, function() {
@@ -99,6 +102,14 @@
                     },
                     left: {
                       current: -1000,
+                      to: 0
+                    },
+                    rotateX: {
+                      current: 0,
+                      to: 0
+                    },
+                    rotateY: {
+                      current: 0,
                       to: 0
                     }
                   }
@@ -153,6 +164,18 @@
         return $container.append(output);
       };
     };
+    $("body").on("mousemove", ".video-item", function(e) {
+      var videoId;
+      videoId = $(this).data("videoid");
+      console.log(videoId);
+      videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10;
+      return videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20;
+    }).on("mouseleave", ".video-item", function(e) {
+      var videoId;
+      videoId = $(this).data("videoid");
+      videoPositions[videoId].values.rotateX.to = 0;
+      return videoPositions[videoId].values.rotateY.to = 0;
+    });
     $("body").on("click", ".video-item", function() {
       var $iframe, videoId;
       videoId = $(this).data("videoid");
@@ -230,13 +253,15 @@
       newLeft = 0;
       newLeftCount = 0;
       return $(".video-item").each(function() {
-        var $this, pos, videoId;
+        var $this, pos, trans, videoId;
         $this = $(this);
         videoId = $this.data("videoid");
         pos = videoPositions[videoId];
         if ($this.attr("data-state") === "fullscreen") {
           pos.values.top.to = $(".items").scrollTop();
           pos.values.left.to = 0;
+          pos.values.rotateX.to = 0;
+          pos.values.rotateY.to = 0;
         } else {
           pos.values.top.to = newTop;
           pos.values.left.to = newLeft;
@@ -249,6 +274,12 @@
         } else {
           newLeftCount++;
         }
+        trans = "perspective(1000px) ";
+        trans += "rotateX(" + pos.values.rotateX.current + "deg) ";
+        trans += "rotateY(" + pos.values.rotateY.current + "deg)";
+        $this.find(".video-item-inner").css({
+          transform: trans
+        });
         return $this.css({
           top: pos.values.top.current,
           left: pos.values.left.current

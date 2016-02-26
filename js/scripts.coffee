@@ -59,6 +59,10 @@
 
 	# Input search
 	$(document).on "keydown", "[data-search]", (event) -> 
+		# Blur
+		if event.which is 27
+			$(this).blur()
+		# Search
 		if event.which is 13
 			val = $(this).val()
 			# Search
@@ -100,6 +104,12 @@
 										to: 0
 									left: 
 										current: -1000
+										to: 0
+									rotateX: 
+										current: 0
+										to: 0
+									rotateY:
+										current: 0
 										to: 0
 							MoveTo.add(pos)
 							videoPositions[val.id.videoId] = pos
@@ -159,10 +169,23 @@
 
 	## End search function
 
+	# Video thumbnail hover
+	$("body")
+		.on "mousemove", ".video-item", (e) ->
+			videoId = $(this).data("videoid")
+			console.log videoId
+			videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
+			videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
+		.on "mouseleave", ".video-item", (e) ->
+			videoId = $(this).data("videoid")
+			videoPositions[videoId].values.rotateX.to = 0
+			videoPositions[videoId].values.rotateY.to = 0
+
+
 	# Video thumbnail click
 	$("body").on "click", ".video-item", () -> 
 		# Get video id
-		videoId = $(this).data("videoid");
+		videoId = $(this).data("videoid")
 
 		# Show video instead of image
 		$(".video-item")
@@ -272,6 +295,8 @@
 				## Position for fullscreen
 				pos.values.top.to = $(".items").scrollTop()
 				pos.values.left.to = 0
+				pos.values.rotateX.to = 0
+				pos.values.rotateY.to = 0
 			else
 				## Position for normal position
 				# Set new top position to move towards
@@ -287,6 +312,12 @@
 				newLeftCount = 0
 			else
 				newLeftCount++
+			# Transform
+			trans = "perspective(1000px) "
+			trans += "rotateX(#{pos.values.rotateX.current}deg) "
+			trans += "rotateY(#{pos.values.rotateY.current}deg)"
+			$this.find(".video-item-inner").css
+				transform: trans
 			# Position element
 			$this.css
 				top: pos.values.top.current

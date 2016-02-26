@@ -45,7 +45,7 @@ body
 	//- Templates
 	template(data-template="video-item")
 		| {{#videos}}
-		.video-item(data-videoid="{{id}}")
+		.video-item(data-videoid="{{id}}"): .video-item-inner
 			//- Thumbnail
 			.video-item-thumbnail(style="background-image: url({{snippet.thumbnails.high.url}});")
 			//- Info

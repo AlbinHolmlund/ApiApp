@@ -74,9 +74,9 @@ MoveTo.render = function (){
 MoveTo.render();
 
 // Helpers
-/*$.fn.centerLeft = function() {
+$.fn.centerLeft = function() {
     return this.offset().left + this.outerWidth()/2;
 };
 $.fn.centerTop = function() {
     return this.offset().top + this.outerHeight()/2;
-};*/
+};
