@@ -158,6 +158,9 @@
             item.statistics.commentCount = "0";
           }
           videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
+          if (!videos[index].custom.likeRatio) {
+            videos[index].custom.likeRatio = "0";
+          }
           videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100;
           videos[index].statistics_formated.viewCount = videos[index].statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");

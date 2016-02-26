@@ -154,6 +154,7 @@
 
 				# Calculate new data
 				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )
+				if !videos[index].custom.likeRatio then videos[index].custom.likeRatio = "0"
 				videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100
 
 				# Make spaces in numbers
