@@ -86,9 +86,12 @@
 		.on "blur", "[data-search]", () ->
 			$(this).closest(".search").addClass "has-searched"
 
-
 	# Search and render result
 	search = (query, callback) -> 
+		# Resets
+		videoList = [] # This array will be populated with videos
+		videoListByKey = {} # Same as videoList but with id as key
+		# Settings
 		settings = "type=video&maxResults=50&order=relevance" #(maxResults = 8)
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=#{query}&#{settings}&key=#{apiKey}"
@@ -96,6 +99,7 @@
 			dataType: "jsonp"
 			success: (data) ->
 				items = data.items
+				console.log data
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax

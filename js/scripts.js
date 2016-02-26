@@ -90,6 +90,8 @@
     });
     search = function(query, callback) {
       var settings, useVideos;
+      videoList = [];
+      videoListByKey = {};
       settings = "type=video&maxResults=50&order=relevance";
       $.ajax({
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
@@ -97,6 +99,7 @@
         success: function(data) {
           var items;
           items = data.items;
+          console.log(data);
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
