@@ -34,8 +34,7 @@ body
 	//- Comment ui
 	.comment-ui
 		.comment-items
-		.text-center
-			button.button.more-comments Load more comments
+		button.button.more-comments Load more comments
 	.close-fullscreen
 
 	//- Info ui
@@ -78,6 +77,19 @@ body
 			a.comment-profile(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});")
 			.comment-name: a(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank") {{snippet.topLevelComment.snippet.authorDisplayName}}
 			.comment-text {{{snippet.topLevelComment.snippet.textDisplay}}}
+			.comment-meta
+				| {{#snippet.totalReplyCount}}
+				span.show-comments
+					i.m-r.icon.ion-ios-chatbubble
+					| {{snippet.totalReplyCount}}
+				| {{/snippet.totalReplyCount}}
+			.comment-replies
+				| {{#replies.comments}}
+				.comment-item
+					a.comment-profile(href="{{snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.authorProfileImageUrl}});")
+					.comment-name: a(href="{{snippet.authorChannelUrl}}", target="_blank") {{snippet.authorDisplayName}}
+					.comment-text {{{snippet.textDisplay}}}
+				| {{/replies.comments}}
 		.clear
 
 		| {{/items}}

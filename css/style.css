@@ -207,6 +207,12 @@ body.state-fullscreen .items {
       font-weight: 300; }
     .comment-ui .comment-item .comment-text {
       margin-left: 70px; }
+    .comment-ui .comment-item .comment-meta {
+      margin-left: 70px;
+      margin-top: 10px;
+      margin-bottom: 10px; }
+    .comment-ui .comment-item .comment-replies {
+      margin-left: 70px; }
 
 .info-ui {
   position: absolute;

@@ -86,14 +86,12 @@
 			dataType: "jsonp"
 			success: (data) ->
 				items = data.items
-				# console.log items # For testing
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
 						url: "https://www.googleapis.com/youtube/v3/videos?id=#{val.id.videoId}&part=snippet,statistics&key=#{apiKey}"
 						dataType: "jsonp"
 						success: (data) -> 
-							console.log "hey"
 							# Add video to list
 							videoListByKey[val.id.videoId] = data.items[0]
 							videoList.push(data.items[0])
@@ -175,7 +173,6 @@
 	$("body")
 		.on "mousemove", ".video-item", (e) ->
 			videoId = $(this).data("videoid")
-			console.log videoId
 			videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
 			videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
 		.on "mouseleave", ".video-item", (e) ->
@@ -215,7 +212,7 @@
 
 		# Populate comment ui with comments
 		$.ajax
-			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&key=#{apiKey}"
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=100&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
 				## Set next page token
@@ -229,6 +226,7 @@
 					comments[index] = val
 
 				## Render comments
+				console.log comments
 				# Get template
 				template = $('[data-template="comments"]').html()
 				# Insert data
@@ -240,7 +238,6 @@
 				# Get template
 				template = $('[data-template="info-ui"]').html()
 				# Insert data
-				console.log videoListByKey[videoId]
 				output = Mustache.render(template, videoListByKey[videoId])
 				# Render output
 				$(".info-ui").html output
@@ -259,6 +256,7 @@
 			.removeClass("disabled")
 
 	# Load more comments
+	###
 	commentsLoading = false
 	autoloadComments = false # If comments should auto load
 	$(document).ready () ->
@@ -286,6 +284,7 @@
 						$(".comment-ui .comment-items").append output
 						# Not loading anymore
 						commentsLoading = false
+	###
 
 	# Load more comments
 	$(document).on "click", ".more-comments:not(.disabled)", () ->
@@ -300,7 +299,8 @@
 
 		videoId = $(".video-item.active").data("videoid")
 		$.ajax
-			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+			#url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=4&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
 				## Set next page token
