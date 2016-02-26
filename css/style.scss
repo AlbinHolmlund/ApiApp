@@ -1,6 +1,8 @@
 // Fonts
 
 // Vars
+$mainClr: #e74c3c;
+$highestLayer: 1000;
 
 // Base CSS
 *{
@@ -12,6 +14,55 @@ html, body{
 	width: 100%;
 	height: 100%;
 	font-family: Lato;
+	font-weight: 100;
+	overflow: hidden;
+}
+a{
+	&, &:active, &:link, &:hover, &:focus{
+		display: inline-block;
+    	text-decoration: none;
+		color: #fff;
+		padding-bottom: 3px;
+		margin-bottom: 3px;
+		border-bottom: 1px solid #fff;
+	}	
+}
+.clear{
+	clear: both;
+}
+
+// Button
+.button{
+	border: 0;
+	outline: 0;
+	background: 0;
+	font-family: inherit;
+	font-weight: 400;
+	font-size: inherit;
+
+	color: #fff;
+	background-color: $mainClr;
+	padding: 15px 20px;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: all 0.4s;
+	&:after{
+		content: "\f10a";
+		font-family: "Ionicons";
+		margin-left: 20px;
+	}
+	&:hover, &:active{
+		color: #fff;
+		background-color: darken($mainClr, 10);
+	}
+	// Kinds
+	&.disabled{
+		background-color: lighten($mainClr, 30);
+		color: #252525;
+	}
+}
+.text-center{
+	text-align: center;
 }
 
 // Search input
@@ -36,6 +87,7 @@ html, body{
 		padding: 0.5em 0.5em;
 
 		font-size: 44px;
+		font-weight: 400;
 		font-family: Lato;
 		text-align: center;
 	}
@@ -57,11 +109,10 @@ $dur: 1s;
 	position: absolute;
 	background: #000;
 	color: #fff;
-		width: 30%;
-		height: 0;
-		padding-bottom: 30% * 0.5625;
-		transition: width $dur,
-					padding-bottom $dur;
+	width: 640px;
+	height: 360px;
+	transition: width $dur,
+				height $dur;
 	// Components
 	&-thumbnail{
 		background-size: cover;
@@ -99,8 +150,9 @@ $dur: 1s;
 	}
 	// State
 	&.active{
-		width: 80%;
-		padding-bottom: 80% * 0.5625;
+		width: 80vw;
+		height: 80vh;
+		z-index: $highestLayer;
 		.video-item-ui{
 			transform: translateY(-100%);
 		}
@@ -114,33 +166,62 @@ $dur: 1s;
 }
 
 //- Other ui
+$commentUiPad: 20px;
 .comment-ui{
 	position: absolute;
 	top: 0;
 	right: 0;
 	bottom: 0;
 	width: 20%;
+	padding: $commentUiPad;
 	background: #252525;
+	color: #fff;
+	overflow-x: hidden;
+	overflow-y: auto;
 	transform: translateX(100%);
 	transition: all $dur;
+	z-index: $highestLayer;
+	// Items
+	.comment-item{
+		margin-bottom: 30px;
+		.comment-profile{
+			float: left;
+			margin-right: 20px;
+			width: 50px;
+			height: 50px;
+			background-size: cover;
+			background-position: center;
+			border-radius: 50%;
+		}
+		.comment-name{
+			font-weight: 300;	
+		}
+		.comment-text{
+			margin-left: 70px;
+		}
+	}
 }
 .info-ui{
 	position: absolute;
 	bottom: 0;
 	left: 0;
-	width: 80%;
-	height: 0;
-	padding-bottom: calc(100vh - 45vw);
-	background: lighten(#252525, 30);
+	width: 80vw;
+	height: 20vh;
+	background: #fff;
 	transform: translateY(100%);
 	transition: all $dur;
+	z-index: $highestLayer;
 }
 .close-fullscreen{
-	position: absolute;
+	position: fixed;
 	top: 0;
-	right: 40px;
+	right: 0;
 	font-size: 5em;
+	color: $mainClr;
 	cursor: pointer;
+	transform: translateX(100%);
+	transition: all $dur;
+	z-index: $highestLayer + 10;
 	&:before{
 		content: "\f404";
 		font-family: "Ionicons";
@@ -153,5 +234,14 @@ body.state-fullscreen{
 	}
 	.info-ui{
 		transform: translateY(0);
+	}
+	.close-fullscreen{
+		right: $commentUiPad;
+		transform: translateX(0);
+		&:hover{
+			transform: translateX(0)
+					   rotate(-180deg)
+					   scale(1.3);
+		}
 	}
 }

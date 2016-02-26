@@ -15,8 +15,12 @@
   </div>
   <div class="items"></div>
   <div class="comment-ui">
-    <div class="close-fullscreen"></div>
+    <div class="comment-items"></div>
+    <div class="text-center">
+      <button class="button more-comments">Load more comments</button>
+    </div>
   </div>
+  <div class="close-fullscreen"></div>
   <div class="info-ui"></div>
   <template data-template="video-item">
     <div data-videoid="{{id}}" class="video-item">
@@ -30,5 +34,12 @@
         <p>Like/Dislike ratio: {{custom.likeRatio}}</p>
       </div>
     </div>
+  </template>
+  <template data-template="comments">{{#items}}
+    <div class="comment-item"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});" class="comment-profile"></a>
+      <div class="comment-name"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank">{{snippet.topLevelComment.snippet.authorDisplayName}}</a></div>
+      <div class="comment-text">{{{snippet.topLevelComment.snippet.textDisplay}}}</div>
+    </div>
+    <div class="clear"></div>{{/items}}
   </template>
 </body>

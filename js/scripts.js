@@ -27,8 +27,9 @@
     	else
     		 * We have token! :D
      */
-    var apiKey, search;
+    var apiKey, commentsNextPageToken, search;
     apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI";
+    commentsNextPageToken = false;
     $(document).ready(function() {
       var searchFixedWidth;
       searchFixedWidth = 690;
@@ -64,7 +65,7 @@
     });
     search = function(query, callback) {
       var settings, useVideos;
-      settings = "type=video&maxResults=5";
+      settings = "type=video&maxResults=5&order=relevance";
       $.ajax({
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
         dataType: "jsonp",
@@ -104,7 +105,7 @@
         });
       };
     };
-    return $("body").on("click", ".video-item", function() {
+    $("body").on("click", ".video-item", function() {
       var videoId;
       $(".video-item").removeClass("active");
       $(this).addClass("active");
@@ -114,10 +115,69 @@
         url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
-          return console.log(data);
+          var comments, output, template;
+          console.log(data);
+          if (data.nextPageToken) {
+            commentsNextPageToken = data.nextPageToken;
+          } else {
+            commentsNextPageToken = false;
+          }
+          comments = data;
+          $.each(comments, function(index, val) {
+            return comments[index] = val;
+          });
+          template = $('[data-template="comments"]').html();
+          output = Mustache.render(template, comments);
+          return $(".comment-ui .comment-items").html(output);
         }
       });
     });
+    $(document).on("click", ".close-fullscreen", function() {
+      $(".video-item").removeClass("active");
+      return $("body").removeClass("state-fullscreen");
+    });
+    $(document).on("click", ".more-comments:not(.disabled)", function() {
+      var $this, videoId;
+      $this = $(this);
+      $this.addClass("disabled");
+      if (commentsNextPageToken) {
+        $this.text("Loading comments...");
+      } else {
+        $this.text("There is no more comments to load");
+        return false;
+      }
+      videoId = $(".video-item.active").data("videoid");
+      return $.ajax({
+        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&pageToken=" + commentsNextPageToken + "&key=" + apiKey,
+        dataType: "jsonp",
+        success: function(data) {
+          var comments, output, template;
+          commentsNextPageToken = data.nextPageToken;
+          comments = data;
+          $.each(comments, function(index, val) {
+            return comments[index] = val;
+          });
+          template = $('[data-template="comments"]').html();
+          output = Mustache.render(template, comments);
+          $(".comment-ui .comment-items").append(output);
+          return $(".more-comments").text("Load more comments").removeClass("disabled");
+        }
+      });
+    });
+    return setInterval(function() {
+      var top;
+      top = 0;
+      return $(".video-item").each(function() {
+        var $this;
+        $this = $(this);
+        if (!$this.hasClass("active")) {
+          $this.css("top", top);
+          return top += $this.height();
+        } else {
+          return $this.css("top", 0);
+        }
+      });
+    }, 1000 / 60);
 
     /*
      */

@@ -29,7 +29,10 @@ body
 
 	//- Comment ui
 	.comment-ui
-		.close-fullscreen
+		.comment-items
+		.text-center
+			button.button.more-comments Load more comments
+	.close-fullscreen
 
 	//- Info ui
 	.info-ui
@@ -49,3 +52,15 @@ body
 				p Dislikes: {{statistics.dislikeCount}}
 				p Comments: {{statistics.commentCount}}
 				p Like/Dislike ratio: {{custom.likeRatio}}
+
+	//- Comments
+	template(data-template="comments")
+		{{#items}}
+		
+		.comment-item
+			a.comment-profile(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});")
+			.comment-name: a(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank") {{snippet.topLevelComment.snippet.authorDisplayName}}
+			.comment-text {{{snippet.topLevelComment.snippet.textDisplay}}}
+		.clear
+
+		{{/items}}

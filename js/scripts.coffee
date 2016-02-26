@@ -27,6 +27,7 @@
 
 	# The sacred api key
 	apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI"
+	commentsNextPageToken = false
 
 	# Input adjust width auto
 	$(document).ready () ->
@@ -62,7 +63,7 @@
 
 	# Search and render result
 	search = (query, callback) -> 
-		settings = "type=video&maxResults=5"
+		settings = "type=video&maxResults=5&order=relevance"
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=#{query}&#{settings}&key=#{apiKey}"
 			#url: "https://www.googleapis.com/youtube/v3/videos/getRating?id=6xIRT0huiuA&access_token=#{accessToken}"
@@ -125,7 +126,75 @@
 			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
+				# For testing
 				console.log data
+				## Set next page token
+				if data.nextPageToken
+					commentsNextPageToken = data.nextPageToken
+				else
+					commentsNextPageToken = false
+				## Correct comments
+				comments = data
+				$.each comments, (index, val) -> 
+					comments[index] = val
+				## Render comments
+				# Get template
+				template = $('[data-template="comments"]').html()
+				# Insert data
+				output = Mustache.render(template, comments)
+				# Render output
+				$(".comment-ui .comment-items").html output
+
+	# Close fullscreen
+	$(document).on "click", ".close-fullscreen", () ->
+		$(".video-item").removeClass("active")
+		$("body").removeClass("state-fullscreen");
+
+	# Load more comments
+	$(document).on "click", ".more-comments:not(.disabled)", () ->
+		$this = $(this)
+		$this.addClass("disabled")
+
+		if commentsNextPageToken
+			$this.text("Loading comments...")
+		else
+			$this.text("There is no more comments to load")
+			return false
+
+		videoId = $(".video-item.active").data("videoid")
+		$.ajax
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+			dataType: "jsonp"
+			success: (data) ->
+				## Set next page token
+				commentsNextPageToken = data.nextPageToken
+				## Correct comments
+				comments = data
+				$.each comments, (index, val) -> 
+					comments[index] = val
+				## Render comments
+				# Get template
+				template = $('[data-template="comments"]').html()
+				# Insert data
+				output = Mustache.render(template, comments)
+				# Render output
+				$(".comment-ui .comment-items").append output
+				# Make button available again
+				$(".more-comments")
+					.text("Load more comments")
+					.removeClass("disabled")
+
+	# Function to position videos
+	setInterval () ->
+		top = 0
+		$(".video-item").each () ->
+			$this = $(this)
+			if !$this.hasClass("active")
+				$this.css "top", top
+				top += $this.height()
+			else
+				$this.css "top", 0
+	, 1000/60
 
 	# Notes
 	# dislikes = item.statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
