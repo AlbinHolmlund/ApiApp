@@ -43,7 +43,7 @@ a{
 
 // Like bar
 .like-bar{
-	margin-top: 20px;
+	margin: 20px 0;
 	width: 50%; 
 	height: 5px;
 	background-color: $dangerClr;
@@ -210,6 +210,8 @@ $dur: 1s;
 		position: absolute;
 		top: 0;
 		left: 0;
+		width: 100%;
+		height: 100%;
 		padding: 20px;
 		transition: all $dur;
 	}
@@ -285,11 +287,26 @@ $commentUiPad: 20px;
 	left: 0;
 	width: 80vw;
 	height: 20vh;
-	background: #252525;
+	padding: 40px;
+	background: lighten(#252525, 5);
+	color: #fff;
 	box-shadow: inset 0 0 20px #000;
 	transform: translateY(100%);
 	transition: all $dur;
 	z-index: $highestLayer;
+	overflow-x: hidden;
+	overflow-y: auto;
+	// Components
+	&-title{
+		margin: 0;
+		margin-bottom: 20px;
+		font-size: 2em;
+		font-weight: 100;
+	}
+	p{
+		margin: 0;
+		margin-bottom: 20px;
+	}
 }
 .close-fullscreen{
 	position: fixed;

@@ -81,3 +81,26 @@ body
 		.clear
 
 		| {{/items}}
+
+	//- Info ui
+	template(data-template="info-ui")
+		h2.info-ui-title 
+			| {{snippet.title}}
+		.like-bar
+			.like-percent(style="width: {{custom.likeRatioPercent}}%;")
+		p
+			span.m-r
+				i.m-r.icon.ion-eye
+				| {{statistics_formated.viewCount}}
+			span.m-r
+				i.m-r.icon.ion-thumbsup.clr-success
+				| {{statistics_formated.likeCount}}
+			span.m-r
+				i.m-r.icon.ion-thumbsdown.clr-danger
+				| {{statistics_formated.dislikeCount}}
+			span.m-r
+				i.m-r.icon.ion-ios-chatbubble
+				| {{statistics_formated.commentCount}}
+		p
+			#[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] 
+			| {{custom.likeRatio}} times more likes than dislikes.

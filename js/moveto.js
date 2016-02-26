@@ -36,7 +36,7 @@ MoveTo.render = function (){
               value.current += (value.to - value.current) / speed;
 
               // Even our the variable, so it doesnt go on forever
-              var compareValue = value.current;
+              /*var compareValue = value.current;
               if (value.to > value.current){
                 compareValue = Math.ceil(value.current);
               } else if (value.to < value.current){
@@ -45,7 +45,7 @@ MoveTo.render = function (){
 
               // Round up if they are very close to each other
               if (Math.round(compareValue) === Math.round(value.to))
-                value.current = value.to;
+                value.current = value.to;*/
             }
           } else {
             // If it is set to small value, it will always keep on going

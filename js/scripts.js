@@ -27,9 +27,11 @@
     	else
     		 * We have token! :D
      */
-    var apiKey, commentsNextPageToken, search, videoPositions;
+    var apiKey, autoloadComments, commentsLoading, commentsNextPageToken, search, videoList, videoListByKey, videoPositions;
     apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk";
     commentsNextPageToken = false;
+    videoList = [];
+    videoListByKey = {};
     $(document).ready(function() {
       var searchFixedWidth;
       searchFixedWidth = 690;
@@ -82,9 +84,8 @@
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
-          var items, videoList;
+          var items;
           items = data.items;
-          videoList = [];
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
@@ -92,6 +93,7 @@
               success: function(data) {
                 var pos;
                 console.log("hey");
+                videoListByKey[val.id.videoId] = data.items[0];
                 videoList.push(data.items[0]);
                 pos = {
                   state: false,
@@ -208,7 +210,11 @@
           });
           template = $('[data-template="comments"]').html();
           output = Mustache.render(template, comments);
-          return $(".comment-ui .comment-items").html(output);
+          $(".comment-ui .comment-items").html(output);
+          template = $('[data-template="info-ui"]').html();
+          console.log(videoListByKey[videoId]);
+          output = Mustache.render(template, videoListByKey[videoId]);
+          return $(".info-ui").html(output);
         }
       });
     });
@@ -218,6 +224,33 @@
       $('.video-item[data-state="fullscreen"]').css("z-index", 2000);
       $(".video-item").attr("data-state", false);
       return $(".more-comments").text("Load more comments").removeClass("disabled");
+    });
+    commentsLoading = false;
+    autoloadComments = false;
+    $(document).ready(function() {
+      return $(".comment-ui").scroll(function(e) {
+        var videoId;
+        if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight && commentsLoading === false && autoloadComments === true) {
+          commentsLoading = true;
+          videoId = $(".video-item.active").data("videoid");
+          return $.ajax({
+            url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&pageToken=" + commentsNextPageToken + "&key=" + apiKey,
+            dataType: "jsonp",
+            success: function(data) {
+              var comments, output, template;
+              commentsNextPageToken = data.nextPageToken;
+              comments = data;
+              $.each(comments, function(index, val) {
+                return comments[index] = val;
+              });
+              template = $('[data-template="comments"]').html();
+              output = Mustache.render(template, comments);
+              $(".comment-ui .comment-items").append(output);
+              return commentsLoading = false;
+            }
+          });
+        }
+      });
     });
     $(document).on("click", ".more-comments:not(.disabled)", function() {
       var $this, videoId;

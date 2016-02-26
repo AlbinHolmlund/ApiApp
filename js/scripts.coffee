@@ -28,6 +28,8 @@
 	# The sacred api key
 	apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk"
 	commentsNextPageToken = false
+	videoList = [] # This array will be populated with videos
+	videoListByKey = {} # Same as videoList but with id as key
 
 	# Input adjust width auto
 	$(document).ready () ->
@@ -85,7 +87,6 @@
 			success: (data) ->
 				items = data.items
 				# console.log items # For testing
-				videoList = [] # This array will be populated with videos
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
@@ -94,6 +95,7 @@
 						success: (data) -> 
 							console.log "hey"
 							# Add video to list
+							videoListByKey[val.id.videoId] = data.items[0]
 							videoList.push(data.items[0])
 							# Create video position
 							pos = 
@@ -225,6 +227,7 @@
 				comments = data
 				$.each comments, (index, val) -> 
 					comments[index] = val
+
 				## Render comments
 				# Get template
 				template = $('[data-template="comments"]').html()
@@ -232,6 +235,15 @@
 				output = Mustache.render(template, comments)
 				# Render output
 				$(".comment-ui .comment-items").html output
+
+				## Render info ui
+				# Get template
+				template = $('[data-template="info-ui"]').html()
+				# Insert data
+				console.log videoListByKey[videoId]
+				output = Mustache.render(template, videoListByKey[videoId])
+				# Render output
+				$(".info-ui").html output
 
 	# Close fullscreen
 	$(document).on "click", ".close-fullscreen", () ->
@@ -245,6 +257,35 @@
 		$(".more-comments")
 			.text("Load more comments")
 			.removeClass("disabled")
+
+	# Load more comments
+	commentsLoading = false
+	autoloadComments = false # If comments should auto load
+	$(document).ready () ->
+		$(".comment-ui").scroll (e) ->
+			if $(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight and commentsLoading is false and autoloadComments is true
+				# Load new comments
+				commentsLoading = true
+				videoId = $(".video-item.active").data("videoid")
+				$.ajax
+					url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+					dataType: "jsonp"
+					success: (data) ->
+						## Set next page token
+						commentsNextPageToken = data.nextPageToken
+						## Correct comments
+						comments = data
+						$.each comments, (index, val) -> 
+							comments[index] = val
+						## Render comments
+						# Get template
+						template = $('[data-template="comments"]').html()
+						# Insert data
+						output = Mustache.render(template, comments)
+						# Render output
+						$(".comment-ui .comment-items").append output
+						# Not loading anymore
+						commentsLoading = false
 
 	# Load more comments
 	$(document).on "click", ".more-comments:not(.disabled)", () ->

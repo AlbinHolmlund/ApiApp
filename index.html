@@ -51,4 +51,15 @@
     </div>
     <div class="clear"></div>{{/items}}
   </template>
+  <template data-template="info-ui">
+    <h2 class="info-ui-title">
+       
+      {{snippet.title}}
+    </h2>
+    <div class="like-bar">
+      <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
+    </div>
+    <p><span class="m-r"><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</span><span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</span></p>
+    <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
+  </template>
 </body>
