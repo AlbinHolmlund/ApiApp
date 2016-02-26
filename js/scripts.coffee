@@ -26,7 +26,7 @@
 	###
 
 	# The sacred api key
-	apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI"
+	apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk"
 	commentsNextPageToken = false
 
 	# Input adjust width auto
@@ -88,6 +88,7 @@
 						url: "https://www.googleapis.com/youtube/v3/videos?id=#{val.id.videoId}&part=snippet,statistics&key=#{apiKey}"
 						dataType: "jsonp"
 						success: (data) -> 
+							console.log "hey"
 							# Add video to list
 							videoList.push(data.items[0])
 							# Create video position
@@ -122,6 +123,14 @@
 					likeRatioPercent: null
 				}
 				videos[index].statistics_formated = {}
+
+				# Check if likes/dislike exists
+				if !item.statistics.likeCount
+					 item.statistics.likeCount = 0
+				if !item.statistics.dislikeCount
+					 item.statistics.dislikeCount = 0
+				if !item.statistics.commentCount
+					 item.statistics.commentCount = 0
 
 				# Calculate new data
 				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )

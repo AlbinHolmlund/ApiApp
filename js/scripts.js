@@ -28,7 +28,7 @@
     		 * We have token! :D
      */
     var apiKey, commentsNextPageToken, search, videoPositions;
-    apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI";
+    apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk";
     commentsNextPageToken = false;
     $(document).ready(function() {
       var searchFixedWidth;
@@ -88,6 +88,7 @@
               dataType: "jsonp",
               success: function(data) {
                 var pos;
+                console.log("hey");
                 videoList.push(data.items[0]);
                 pos = {
                   state: false,
@@ -124,6 +125,15 @@
             likeRatioPercent: null
           };
           videos[index].statistics_formated = {};
+          if (!item.statistics.likeCount) {
+            item.statistics.likeCount = 0;
+          }
+          if (!item.statistics.dislikeCount) {
+            item.statistics.dislikeCount = 0;
+          }
+          if (!item.statistics.commentCount) {
+            item.statistics.commentCount = 0;
+          }
           videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
           videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100;
           videos[index].statistics_formated.viewCount = videos[index].statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
