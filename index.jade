@@ -78,17 +78,31 @@ body
 			.comment-name: a(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank") {{snippet.topLevelComment.snippet.authorDisplayName}}
 			.comment-text {{{snippet.topLevelComment.snippet.textDisplay}}}
 			.comment-meta
+				//- Reply count
 				| {{#snippet.totalReplyCount}}
-				span.show-comments
+				span.m-r
 					i.m-r.icon.ion-ios-chatbubble
 					| {{snippet.totalReplyCount}}
 				| {{/snippet.totalReplyCount}}
+				//- Likes
+				| {{#snippet.topLevelComment.snippet.likeCount}}
+				span.m-l.m-r
+					i.m-r.icon.ion-thumbsup
+					| {{snippet.topLevelComment.snippet.likeCount}}
+				| {{/snippet.topLevelComment.snippet.likeCount}}
 			.comment-replies
 				| {{#replies.comments}}
 				.comment-item
 					a.comment-profile(href="{{snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.authorProfileImageUrl}});")
 					.comment-name: a(href="{{snippet.authorChannelUrl}}", target="_blank") {{snippet.authorDisplayName}}
 					.comment-text {{{snippet.textDisplay}}}
+					.comment-meta
+						//- Likes
+						| {{#snippet.likeCount}}
+						span.m-r
+							i.m-r.icon.ion-thumbsup
+							| {{snippet.likeCount}}
+						| {{/snippet.likeCount}}
 				| {{/replies.comments}}
 		.clear
 

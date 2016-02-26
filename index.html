@@ -46,11 +46,14 @@
     <div class="comment-item"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});" class="comment-profile"></a>
       <div class="comment-name"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank">{{snippet.topLevelComment.snippet.authorDisplayName}}</a></div>
       <div class="comment-text">{{{snippet.topLevelComment.snippet.textDisplay}}}</div>
-      <div class="comment-meta">{{#snippet.totalReplyCount}}<span class="show-comments"><i class="m-r icon ion-ios-chatbubble"></i>{{snippet.totalReplyCount}}</span>{{/snippet.totalReplyCount}}</div>
+      <div class="comment-meta">{{#snippet.totalReplyCount}}<span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{snippet.totalReplyCount}}</span>{{/snippet.totalReplyCount}}{{#snippet.topLevelComment.snippet.likeCount}}<span class="m-l m-r"><i class="m-r icon ion-thumbsup"></i>{{snippet.topLevelComment.snippet.likeCount}}</span>{{/snippet.topLevelComment.snippet.likeCount}}
+      </div>
       <div class="comment-replies">{{#replies.comments}}
         <div class="comment-item"><a href="{{snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.authorProfileImageUrl}});" class="comment-profile"></a>
           <div class="comment-name"><a href="{{snippet.authorChannelUrl}}" target="_blank">{{snippet.authorDisplayName}}</a></div>
           <div class="comment-text">{{{snippet.textDisplay}}}</div>
+          <div class="comment-meta">{{#snippet.likeCount}}<span class="m-r"><i class="m-r icon ion-thumbsup"></i>{{snippet.likeCount}}</span>{{/snippet.likeCount}}
+          </div>
         </div>{{/replies.comments}}
       </div>
     </div>

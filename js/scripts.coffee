@@ -56,8 +56,18 @@
 				$inputSize = $span.outerWidth()
 				$span.css("display", "")
 				$(this).stop()
-				$(this).css("width", $inputSize)
-				$(this).css("height", $inputSize)
+				# Animate or just change
+				if $inputSize < $(this).outerWidth()
+					$(this).animate(
+						width: $inputSize
+						height: $inputSize
+					,
+						duration: 200
+					)
+				else
+					$(this).css
+						width: $inputSize
+						height: $inputSize
 
 	# Input search
 	$(document).on "keydown", "[data-search]", (event) -> 
@@ -212,7 +222,7 @@
 
 		# Populate comment ui with comments
 		$.ajax
-			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=100&key=#{apiKey}"
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=10&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
 				## Set next page token

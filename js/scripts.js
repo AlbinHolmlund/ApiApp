@@ -55,8 +55,19 @@
           $inputSize = $span.outerWidth();
           $span.css("display", "");
           $(this).stop();
-          $(this).css("width", $inputSize);
-          return $(this).css("height", $inputSize);
+          if ($inputSize < $(this).outerWidth()) {
+            return $(this).animate({
+              width: $inputSize,
+              height: $inputSize
+            }, {
+              duration: 200
+            });
+          } else {
+            return $(this).css({
+              width: $inputSize,
+              height: $inputSize
+            });
+          }
         }
       });
     });
@@ -193,7 +204,7 @@
       $(this).attr("data-state", "fullscreen");
       $("body").addClass("state-fullscreen");
       return $.ajax({
-        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet,replies&order=relevance&maxResults=100&key=" + apiKey,
+        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet,replies&order=relevance&maxResults=10&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var comments, output, template;
