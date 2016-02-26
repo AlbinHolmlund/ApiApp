@@ -34,8 +34,7 @@ body
 	//- Comment ui
 	.comment-ui
 		.comment-items
-		.text-center
-			button.button.more-comments Load more comments
+		button.button.more-comments Load more comments
 	.close-fullscreen
 
 	//- Info ui
@@ -78,6 +77,56 @@ body
 			a.comment-profile(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});")
 			.comment-name: a(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank") {{snippet.topLevelComment.snippet.authorDisplayName}}
 			.comment-text {{{snippet.topLevelComment.snippet.textDisplay}}}
+			.comment-meta
+				//- Reply count
+				| {{#snippet.totalReplyCount}}
+				span.m-r
+					i.m-r.icon.ion-ios-chatbubble
+					| {{snippet.totalReplyCount}}
+				| {{/snippet.totalReplyCount}}
+				//- Likes
+				| {{#snippet.topLevelComment.snippet.likeCount}}
+				span.m-l.m-r
+					i.m-r.icon.ion-thumbsup
+					| {{snippet.topLevelComment.snippet.likeCount}}
+				| {{/snippet.topLevelComment.snippet.likeCount}}
+			.comment-replies
+				| {{#replies.comments}}
+				.comment-item
+					a.comment-profile(href="{{snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.authorProfileImageUrl}});")
+					.comment-name: a(href="{{snippet.authorChannelUrl}}", target="_blank") {{snippet.authorDisplayName}}
+					.comment-text {{{snippet.textDisplay}}}
+					.comment-meta
+						//- Likes
+						| {{#snippet.likeCount}}
+						span.m-r
+							i.m-r.icon.ion-thumbsup
+							| {{snippet.likeCount}}
+						| {{/snippet.likeCount}}
+				| {{/replies.comments}}
 		.clear
 
 		| {{/items}}
+
+	//- Info ui
+	template(data-template="info-ui")
+		h2.info-ui-title 
+			| {{snippet.title}}
+		.like-bar
+			.like-percent(style="width: {{custom.likeRatioPercent}}%;")
+		p
+			span.m-r
+				i.m-r.icon.ion-eye
+				| {{statistics_formated.viewCount}}
+			span.m-r
+				i.m-r.icon.ion-thumbsup.clr-success
+				| {{statistics_formated.likeCount}}
+			span.m-r
+				i.m-r.icon.ion-thumbsdown.clr-danger
+				| {{statistics_formated.dislikeCount}}
+			span.m-r
+				i.m-r.icon.ion-ios-chatbubble
+				| {{statistics_formated.commentCount}}
+		p
+			#[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] 
+			| {{custom.likeRatio}} times more likes than dislikes.

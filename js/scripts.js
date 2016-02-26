@@ -27,9 +27,11 @@
     	else
     		 * We have token! :D
      */
-    var apiKey, commentsNextPageToken, search, videoPositions;
+    var apiKey, commentsNextPageToken, search, videoList, videoListByKey, videoPositions;
     apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk";
     commentsNextPageToken = false;
+    videoList = [];
+    videoListByKey = {};
     $(document).ready(function() {
       var searchFixedWidth;
       searchFixedWidth = 690;
@@ -53,8 +55,19 @@
           $inputSize = $span.outerWidth();
           $span.css("display", "");
           $(this).stop();
-          $(this).css("width", $inputSize);
-          return $(this).css("height", $inputSize);
+          if ($inputSize < $(this).outerWidth()) {
+            return $(this).animate({
+              width: $inputSize,
+              height: $inputSize
+            }, {
+              duration: 200
+            });
+          } else {
+            return $(this).css({
+              width: $inputSize,
+              height: $inputSize
+            });
+          }
         }
       });
     });
@@ -82,16 +95,15 @@
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
-          var items, videoList;
+          var items;
           items = data.items;
-          videoList = [];
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
               dataType: "jsonp",
               success: function(data) {
                 var pos;
-                console.log("hey");
+                videoListByKey[val.id.videoId] = data.items[0];
                 videoList.push(data.items[0]);
                 pos = {
                   state: false,
@@ -167,7 +179,6 @@
     $("body").on("mousemove", ".video-item", function(e) {
       var videoId;
       videoId = $(this).data("videoid");
-      console.log(videoId);
       videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10;
       return videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20;
     }).on("mouseleave", ".video-item", function(e) {
@@ -193,7 +204,7 @@
       $(this).attr("data-state", "fullscreen");
       $("body").addClass("state-fullscreen");
       return $.ajax({
-        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&key=" + apiKey,
+        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet,replies&order=relevance&maxResults=10&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var comments, output, template;
@@ -206,9 +217,13 @@
           $.each(comments, function(index, val) {
             return comments[index] = val;
           });
+          console.log(comments);
           template = $('[data-template="comments"]').html();
           output = Mustache.render(template, comments);
-          return $(".comment-ui .comment-items").html(output);
+          $(".comment-ui .comment-items").html(output);
+          template = $('[data-template="info-ui"]').html();
+          output = Mustache.render(template, videoListByKey[videoId]);
+          return $(".info-ui").html(output);
         }
       });
     });
@@ -219,6 +234,36 @@
       $(".video-item").attr("data-state", false);
       return $(".more-comments").text("Load more comments").removeClass("disabled");
     });
+
+    /*
+    	commentsLoading = false
+    	autoloadComments = false # If comments should auto load
+    	$(document).ready () ->
+    		$(".comment-ui").scroll (e) ->
+    			if $(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight and commentsLoading is false and autoloadComments is true
+    				 * Load new comments
+    				commentsLoading = true
+    				videoId = $(".video-item.active").data("videoid")
+    				$.ajax
+    					url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+    					dataType: "jsonp"
+    					success: (data) ->
+    						## Set next page token
+    						commentsNextPageToken = data.nextPageToken
+    						## Correct comments
+    						comments = data
+    						$.each comments, (index, val) -> 
+    							comments[index] = val
+    						## Render comments
+    						 * Get template
+    						template = $('[data-template="comments"]').html()
+    						 * Insert data
+    						output = Mustache.render(template, comments)
+    						 * Render output
+    						$(".comment-ui .comment-items").append output
+    						 * Not loading anymore
+    						commentsLoading = false
+     */
     $(document).on("click", ".more-comments:not(.disabled)", function() {
       var $this, videoId;
       $this = $(this);
@@ -231,7 +276,7 @@
       }
       videoId = $(".video-item.active").data("videoid");
       return $.ajax({
-        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&pageToken=" + commentsNextPageToken + "&key=" + apiKey,
+        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet,replies&order=relevance&maxResults=4&pageToken=" + commentsNextPageToken + "&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var comments, output, template;

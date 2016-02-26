@@ -28,6 +28,8 @@
 	# The sacred api key
 	apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk"
 	commentsNextPageToken = false
+	videoList = [] # This array will be populated with videos
+	videoListByKey = {} # Same as videoList but with id as key
 
 	# Input adjust width auto
 	$(document).ready () ->
@@ -54,8 +56,18 @@
 				$inputSize = $span.outerWidth()
 				$span.css("display", "")
 				$(this).stop()
-				$(this).css("width", $inputSize)
-				$(this).css("height", $inputSize)
+				# Animate or just change
+				if $inputSize < $(this).outerWidth()
+					$(this).animate(
+						width: $inputSize
+						height: $inputSize
+					,
+						duration: 200
+					)
+				else
+					$(this).css
+						width: $inputSize
+						height: $inputSize
 
 	# Input search
 	$(document).on "keydown", "[data-search]", (event) -> 
@@ -84,16 +96,14 @@
 			dataType: "jsonp"
 			success: (data) ->
 				items = data.items
-				# console.log items # For testing
-				videoList = [] # This array will be populated with videos
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
 						url: "https://www.googleapis.com/youtube/v3/videos?id=#{val.id.videoId}&part=snippet,statistics&key=#{apiKey}"
 						dataType: "jsonp"
 						success: (data) -> 
-							console.log "hey"
 							# Add video to list
+							videoListByKey[val.id.videoId] = data.items[0]
 							videoList.push(data.items[0])
 							# Create video position
 							pos = 
@@ -173,7 +183,6 @@
 	$("body")
 		.on "mousemove", ".video-item", (e) ->
 			videoId = $(this).data("videoid")
-			console.log videoId
 			videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
 			videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
 		.on "mouseleave", ".video-item", (e) ->
@@ -213,7 +222,7 @@
 
 		# Populate comment ui with comments
 		$.ajax
-			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&key=#{apiKey}"
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=10&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
 				## Set next page token
@@ -225,13 +234,23 @@
 				comments = data
 				$.each comments, (index, val) -> 
 					comments[index] = val
+
 				## Render comments
+				console.log comments
 				# Get template
 				template = $('[data-template="comments"]').html()
 				# Insert data
 				output = Mustache.render(template, comments)
 				# Render output
 				$(".comment-ui .comment-items").html output
+
+				## Render info ui
+				# Get template
+				template = $('[data-template="info-ui"]').html()
+				# Insert data
+				output = Mustache.render(template, videoListByKey[videoId])
+				# Render output
+				$(".info-ui").html output
 
 	# Close fullscreen
 	$(document).on "click", ".close-fullscreen", () ->
@@ -247,6 +266,37 @@
 			.removeClass("disabled")
 
 	# Load more comments
+	###
+	commentsLoading = false
+	autoloadComments = false # If comments should auto load
+	$(document).ready () ->
+		$(".comment-ui").scroll (e) ->
+			if $(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight and commentsLoading is false and autoloadComments is true
+				# Load new comments
+				commentsLoading = true
+				videoId = $(".video-item.active").data("videoid")
+				$.ajax
+					url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+					dataType: "jsonp"
+					success: (data) ->
+						## Set next page token
+						commentsNextPageToken = data.nextPageToken
+						## Correct comments
+						comments = data
+						$.each comments, (index, val) -> 
+							comments[index] = val
+						## Render comments
+						# Get template
+						template = $('[data-template="comments"]').html()
+						# Insert data
+						output = Mustache.render(template, comments)
+						# Render output
+						$(".comment-ui .comment-items").append output
+						# Not loading anymore
+						commentsLoading = false
+	###
+
+	# Load more comments
 	$(document).on "click", ".more-comments:not(.disabled)", () ->
 		$this = $(this)
 		$this.addClass("disabled")
@@ -259,7 +309,8 @@
 
 		videoId = $(".video-item.active").data("videoid")
 		$.ajax
-			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+			#url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=4&pageToken=#{commentsNextPageToken}&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
 				## Set next page token

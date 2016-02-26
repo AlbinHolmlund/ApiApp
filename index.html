@@ -18,9 +18,7 @@
   <div class="items"></div>
   <div class="comment-ui">
     <div class="comment-items"></div>
-    <div class="text-center">
-      <button class="button more-comments">Load more comments</button>
-    </div>
+    <button class="button more-comments">Load more comments</button>
   </div>
   <div class="close-fullscreen"></div>
   <div class="info-ui"></div>
@@ -48,7 +46,28 @@
     <div class="comment-item"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});" class="comment-profile"></a>
       <div class="comment-name"><a href="{{snippet.topLevelComment.snippet.authorChannelUrl}}" target="_blank">{{snippet.topLevelComment.snippet.authorDisplayName}}</a></div>
       <div class="comment-text">{{{snippet.topLevelComment.snippet.textDisplay}}}</div>
+      <div class="comment-meta">{{#snippet.totalReplyCount}}<span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{snippet.totalReplyCount}}</span>{{/snippet.totalReplyCount}}{{#snippet.topLevelComment.snippet.likeCount}}<span class="m-l m-r"><i class="m-r icon ion-thumbsup"></i>{{snippet.topLevelComment.snippet.likeCount}}</span>{{/snippet.topLevelComment.snippet.likeCount}}
+      </div>
+      <div class="comment-replies">{{#replies.comments}}
+        <div class="comment-item"><a href="{{snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.authorProfileImageUrl}});" class="comment-profile"></a>
+          <div class="comment-name"><a href="{{snippet.authorChannelUrl}}" target="_blank">{{snippet.authorDisplayName}}</a></div>
+          <div class="comment-text">{{{snippet.textDisplay}}}</div>
+          <div class="comment-meta">{{#snippet.likeCount}}<span class="m-r"><i class="m-r icon ion-thumbsup"></i>{{snippet.likeCount}}</span>{{/snippet.likeCount}}
+          </div>
+        </div>{{/replies.comments}}
+      </div>
     </div>
     <div class="clear"></div>{{/items}}
+  </template>
+  <template data-template="info-ui">
+    <h2 class="info-ui-title">
+       
+      {{snippet.title}}
+    </h2>
+    <div class="like-bar">
+      <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
+    </div>
+    <p><span class="m-r"><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</span><span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</span></p>
+    <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
   </template>
 </body>
