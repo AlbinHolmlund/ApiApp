@@ -216,7 +216,8 @@
       $(".video-item").removeClass("active");
       $("body").removeClass("state-fullscreen");
       $('.video-item[data-state="fullscreen"]').css("z-index", 2000);
-      return $(".video-item").attr("data-state", false);
+      $(".video-item").attr("data-state", false);
+      return $(".more-comments").text("Load more comments").removeClass("disabled");
     });
     $(document).on("click", ".more-comments:not(.disabled)", function() {
       var $this, videoId;

@@ -241,6 +241,10 @@
 		$('.video-item[data-state="fullscreen"]').css("z-index", 2000)
 		# Set this state to normal
 		$(".video-item").attr("data-state", false)
+		# Make comment button available again
+		$(".more-comments")
+			.text("Load more comments")
+			.removeClass("disabled")
 
 	# Load more comments
 	$(document).on "click", ".more-comments:not(.disabled)", () ->
