@@ -27,7 +27,8 @@
     	else
     		 * We have token! :D
      */
-    var search;
+    var apiKey, search;
+    apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI";
     $(document).ready(function() {
       var searchFixedWidth;
       searchFixedWidth = 690;
@@ -61,24 +62,23 @@
         });
       }
     });
-    return search = function(query, callback) {
-      var apiKey, settings, useVideos;
+    search = function(query, callback) {
+      var settings, useVideos;
       settings = "type=video&maxResults=5";
-      apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI";
       $.ajax({
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var items, videoList;
           items = data.items;
-          videoList = [];
+          videoList = {};
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
               dataType: "jsonp",
               success: function(data) {
-                videoList.push(data.items[0]);
-                if (videoList.length === items.length) {
+                videoList[val.id.videoId] = data.items[0];
+                if (Object.keys(videoList).length === items.length) {
                   useVideos(videoList);
                   return callback();
                 }
@@ -93,45 +93,34 @@
         $container = $(".items");
         $container.html("");
         return $.each(videos, function(index, item) {
-          var $image, $info, $item, $video, dislikes, likes;
-          $item = $("<div/>");
-          $video = $("<iframe/>", {
-            width: 640,
-            height: 360,
-            src: "https://www.youtube.com/embed/" + item.id,
-            frameborder: 0,
-            allowfullscreen: true,
-            css: {
-              display: "none"
-            }
-          });
-          $image = $("<div/>", {
-            css: {
-              backgroundImage: "url(" + item.snippet.thumbnails.standard.url + ")",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              width: 640,
-              height: 360,
-              cursor: "pointer"
-            }
-          });
-          $image.click(function() {
-            $(this).remove();
-            return $video.css("display", "");
-          });
-          likes = item.statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-          dislikes = item.statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-          $info = $("<div/>");
-          $info.append("<strong>" + item.snippet.title + "</strong>");
-          $info.append("<p>Likes: " + likes + "</p>");
-          $info.append("<p>Dislikes: " + dislikes + "</p>");
-          $item.append($image);
-          $item.append($video);
-          $item.append($info);
-          return $container.append($item);
+          var output, template;
+          videos[index].custom = {
+            likeRatio: null
+          };
+          videos[index].custom.likeRatio = item.statistics.likeCount / item.statistics.dislikeCount;
+          template = $('[data-template="video-item"]').html();
+          output = Mustache.render(template, item);
+          return $container.append(output);
         });
       };
     };
+    return $("body").on("click", ".video-item", function() {
+      var videoId;
+      $(".video-item").removeClass("active");
+      $(this).addClass("active");
+      $("body").addClass("state-fullscreen");
+      videoId = $(this).data("videoid");
+      return $.ajax({
+        url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet&key=" + apiKey,
+        dataType: "jsonp",
+        success: function(data) {
+          return console.log(data);
+        }
+      });
+    });
+
+    /*
+     */
   })(jQuery);
 
 }).call(this);

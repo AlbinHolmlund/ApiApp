@@ -25,6 +25,9 @@
 		# We have token! :D
 	###
 
+	# The sacred api key
+	apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI"
+
 	# Input adjust width auto
 	$(document).ready () ->
 		searchFixedWidth = 690
@@ -60,7 +63,6 @@
 	# Search and render result
 	search = (query, callback) -> 
 		settings = "type=video&maxResults=5"
-		apiKey = "AIzaSyBcN17dQgPoR3pAfZsFDiorljShq2lcpXI"
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=#{query}&#{settings}&key=#{apiKey}"
 			#url: "https://www.googleapis.com/youtube/v3/videos/getRating?id=6xIRT0huiuA&access_token=#{accessToken}"
@@ -68,16 +70,17 @@
 			success: (data) ->
 				items = data.items
 				# console.log items # For testing
-				videoList = [] # This array will be populated with videos
+				videoList = {} # This array will be populated with videos
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
 						url: "https://www.googleapis.com/youtube/v3/videos?id=#{val.id.videoId}&part=snippet,statistics&key=#{apiKey}"
 						dataType: "jsonp"
 						success: (data) -> 
-							videoList.push data.items[0]
+							# Add video to list
+							videoList[val.id.videoId] = data.items[0]
 							# If this is the last result, run function that uses the videos
-							if videoList.length is items.length
+							if Object.keys(videoList).length is items.length
 								useVideos(videoList)
 								# Run callback
 								callback()
@@ -89,44 +92,44 @@
 			$container.html("") # Clear container
 			# Loop through all videos
 			$.each videos, (index, item) ->
-				# Item setup
-				$item = $("<div/>")
-				# Video
-				$video = $("<iframe/>",
-							width: 640
-							height: 360
-							src: "https://www.youtube.com/embed/#{item.id}"
-							frameborder: 0
-							allowfullscreen: true
-							css:
-								display: "none"
-						)
-				# Thumbnail
-				$image = $("<div/>",
-							css: 
-								backgroundImage: "url(#{item.snippet.thumbnails.standard.url})"
-								backgroundSize: "cover"
-								backgroundPosition: "center"
-								width: 640
-								height: 360
-								cursor: "pointer"
-						)
-				$image.click () ->
-					# Show video instead of image
-					$(this).remove()
-					$video.css("display", "")
-				# List info
-				likes = item.statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-				dislikes = item.statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-				$info = $("<div/>")
-				$info.append "<strong>#{item.snippet.title}</strong>"
-				$info.append "<p>Likes: #{likes}</p>"
-				$info.append "<p>Dislikes: #{dislikes}</p>"
+				## Edit data before rendering
+				videos[index].custom = {
+					likeRatio: null
+				}
 
-				# Appends
-				$item.append $image # Image into item
-				$item.append $video # Video into item
-				$item.append $info # Info into item
-				$container.append $item # Add item to container
+				# Calculate new data
+				videos[index].custom.likeRatio = item.statistics.likeCount / item.statistics.dislikeCount
+
+				## Render item
+				# Get template
+				template = $('[data-template="video-item"]').html()
+				# Insert data
+				output = Mustache.render(template, item)
+				# Render output
+				$container.append output
+
 	## End search function
+
+	# Video thumbnail click
+	$("body").on "click", ".video-item", () -> 
+		# Show video instead of image
+		$(".video-item").removeClass("active")
+		$(this).addClass("active")
+
+		# Show other ui
+		$("body").addClass("state-fullscreen");
+
+		# Populate comment ui with comments
+		videoId = $(this).data("videoid");
+		$.ajax
+			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet&key=#{apiKey}"
+			dataType: "jsonp"
+			success: (data) ->
+				console.log data
+
+	# Notes
+	# dislikes = item.statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+	###
+
+	###
 ) jQuery

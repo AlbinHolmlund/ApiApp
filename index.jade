@@ -7,8 +7,14 @@ head
 	//- Style
 	link(rel="stylesheet", href="css/style.css")
 
+	//- Ionicons
+	link(rel="stylesheet", href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css")
+
 	//- jQuery
 	script(type="text/javascript", src="https://code.jquery.com/jquery-2.2.1.min.js")
+
+	//- MustacheJS
+	script(type="text/javascript", src="js/mustache.js")
 
 	//- Custom scripts
 	script(type="text/javascript", src="js/scripts.js")
@@ -18,4 +24,28 @@ body
 		input(data-search, placeholder="Search for something awesome...")
 		span
 	
+	//- Videos
 	.items
+
+	//- Comment ui
+	.comment-ui
+		.close-fullscreen
+
+	//- Info ui
+	.info-ui
+
+	
+	//- Templates
+	template(data-template="video-item")
+		.video-item(data-videoid="{{id}}")
+			//- Thumbnail
+			.video-item-thumbnail(style="background-image: url({{snippet.thumbnails.standard.url}});")
+			//- Video
+			iframe.video-item-video(src="https://www.youtube.com/embed/{{id}}", frameborder=0, allowfullscreen=true)
+			//- Info
+			.video-item-ui
+				h2.video-item-heading {{snippet.title}}
+				p Likes: {{statistics.likeCount}}
+				p Dislikes: {{statistics.dislikeCount}}
+				p Comments: {{statistics.commentCount}}
+				p Like/Dislike ratio: {{custom.likeRatio}}
