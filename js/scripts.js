@@ -48,7 +48,7 @@
           });
         } else {
           $span = $(this).siblings("span").first();
-          $span.text($(this).val());
+          $span.text($(this).val().replace(/ /g, "+"));
           $span.css("display", "inline-block");
           $inputSize = $span.outerWidth();
           $span.css("display", "");
@@ -120,9 +120,16 @@
         $container.html("");
         $.each(videos, function(index, item) {
           videos[index].custom = {
-            likeRatio: null
+            likeRatio: null,
+            likeRatioPercent: null
           };
-          return videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
+          videos[index].statistics_formated = {};
+          videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
+          videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100;
+          videos[index].statistics_formated.viewCount = videos[index].statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          return videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
         });
         sortVideos = function(a, b) {
           return b.custom.likeRatio - a.custom.likeRatio;

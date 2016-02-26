@@ -49,7 +49,7 @@
 			else
 				# Set size
 				$span = $(this).siblings("span").first()
-				$span.text($(this).val())
+				$span.text($(this).val().replace(/ /g, "+"))
 				$span.css("display", "inline-block")
 				$inputSize = $span.outerWidth()
 				$span.css("display", "")
@@ -119,10 +119,19 @@
 				## Edit data before rendering
 				videos[index].custom = {
 					likeRatio: null
+					likeRatioPercent: null
 				}
+				videos[index].statistics_formated = {}
 
 				# Calculate new data
 				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )
+				videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100
+
+				# Make spaces in numbers
+				videos[index].statistics_formated.viewCount = videos[index].statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+				videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+				videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+				videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 
 			# Sort before rendering
 			sortVideos = (a, b) ->

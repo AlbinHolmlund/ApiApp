@@ -44,22 +44,35 @@ body
 	
 	//- Templates
 	template(data-template="video-item")
-		{{#videos}}
+		| {{#videos}}
 		.video-item(data-videoid="{{id}}")
 			//- Thumbnail
 			.video-item-thumbnail(style="background-image: url({{snippet.thumbnails.high.url}});")
 			//- Info
 			.video-item-ui
 				h2.video-item-heading {{snippet.title}}
-				p Likes: {{statistics.likeCount}}
-				p Dislikes: {{statistics.dislikeCount}}
-				p Comments: {{statistics.commentCount}}
-				p Like/Dislike ratio: {{custom.likeRatio}} times more likes than dislikes.
-		{{/videos}}
+				p
+					i.m-r.icon.ion-eye
+					| {{statistics_formated.viewCount}}
+				p
+					i.m-r.icon.ion-thumbsup.clr-success
+					| {{statistics_formated.likeCount}}
+				p
+					i.m-r.icon.ion-thumbsdown.clr-danger
+					| {{statistics_formated.dislikeCount}}
+				p 
+					i.m-r.icon.ion-ios-chatbubble
+					| {{statistics_formated.commentCount}}
+				p #[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] {{custom.likeRatio}} times more likes than dislikes.
+				p
+					.like-bar
+						.like-percent(style="width: {{custom.likeRatioPercent}}%;")
+
+		| {{/videos}}
 
 	//- Comments
 	template(data-template="comments")
-		{{#items}}
+		| {{#items}}
 		
 		.comment-item
 			a.comment-profile(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});")
@@ -67,4 +80,4 @@ body
 			.comment-text {{{snippet.topLevelComment.snippet.textDisplay}}}
 		.clear
 
-		{{/items}}
+		| {{/items}}

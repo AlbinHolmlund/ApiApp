@@ -4,6 +4,9 @@
 $mainClr: #e74c3c;
 $highestLayer: 1000;
 
+$successClr: #40d47e;
+$dangerClr: #e74c3c;
+
 // Base CSS
 *{
 	box-sizing: border-box;
@@ -30,6 +33,32 @@ a{
 }
 .clear{
 	clear: both;
+}
+.m-r{
+	margin-right: 10px;
+}
+.m-l{
+	margin-left: 10px;
+}
+
+// Like bar
+.like-bar{
+	margin-top: 20px;
+	width: 50%; 
+	height: 5px;
+	background-color: $dangerClr;
+	.like-percent{
+		background-color: $successClr;
+		height: 5px;
+	}
+}
+
+// Clr
+.clr-success{
+	color: $successClr;
+}
+.clr-danger{
+	color: $dangerClr;
 }
 
 // Button
@@ -91,21 +120,30 @@ a{
 		font-weight: 400;
 		font-family: Lato;
 		text-align: center;
-		transition: transform 1s
-					opacity 1s;
+		transform-origin: center 0;
+		transition: transform 1s,
+					opacity 1s,
+					box-shadow 1s;
+	}
+	input{
+		box-shadow: 0 0 0 20px rgba(lighten(#e74c3c, 20), 0.2),
+					0 0 0 40px rgba(lighten(#e74c3c, 10), 0.2),
+					0 0 0 60px rgba(lighten(#e74c3c, 0), 0.2);
 	}
 	span{
 		display: none;
 	}
 	// States
 	&.has-searched{
-		top: 1px;
+		top: 40px;
 		transform-origin: center 0;
-		transform: translate(-50%, 0%)
-				   scale(0.8);
+		transform: translate(-50%, 0%);
 		input{
 			opacity: 0.4;
 			transform: scale(0.5);
+			box-shadow: 0 0 0 0px #e74c3c,
+						0 0 0 0px darken(#e74c3c, 10),
+						0 0 0 0px darken(#e74c3c, 20);
 		}
 	}
 }
@@ -203,6 +241,7 @@ $commentUiPad: 20px;
 	bottom: 0;
 	width: 20%;
 	padding: $commentUiPad;
+	padding-right: $commentUiPad*2 + 30px;
 	background: #252525;
 	color: #fff;
 	overflow-x: hidden;
