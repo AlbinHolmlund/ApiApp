@@ -149,13 +149,13 @@
           };
           videos[index].statistics_formated = {};
           if (!item.statistics.likeCount) {
-            item.statistics.likeCount = 0;
+            item.statistics.likeCount = "0";
           }
           if (!item.statistics.dislikeCount) {
-            item.statistics.dislikeCount = 0;
+            item.statistics.dislikeCount = "0";
           }
           if (!item.statistics.commentCount) {
-            item.statistics.commentCount = 0;
+            item.statistics.commentCount = "0";
           }
           videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
           videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100;

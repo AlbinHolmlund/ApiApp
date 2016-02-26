@@ -146,11 +146,11 @@
 
 				# Check if likes/dislike exists
 				if !item.statistics.likeCount
-					 item.statistics.likeCount = 0
+					 item.statistics.likeCount = "0"
 				if !item.statistics.dislikeCount
-					 item.statistics.dislikeCount = 0
+					 item.statistics.dislikeCount = "0"
 				if !item.statistics.commentCount
-					 item.statistics.commentCount = 0
+					 item.statistics.commentCount = "0"
 
 				# Calculate new data
 				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )
