@@ -26,19 +26,21 @@
   <div class="info-ui"></div>
   <template data-template="video-item">{{#videos}}
     <div data-videoid="{{id}}" class="video-item">
-      <div style="background-image: url({{snippet.thumbnails.high.url}});" class="video-item-thumbnail"></div>
-      <div class="video-item-ui">
-        <h2 class="video-item-heading">{{snippet.title}}</h2>
-        <p><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</p>
-        <p><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</p>
-        <p><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</p>
-        <p> <i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</p>
-        <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
-        <p>
-          <div class="like-bar">
-            <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
-          </div>
-        </p>
+      <div class="video-item-inner">
+        <div style="background-image: url({{snippet.thumbnails.high.url}});" class="video-item-thumbnail"></div>
+        <div class="video-item-ui">
+          <h2 class="video-item-heading">{{snippet.title}}</h2>
+          <p><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</p>
+          <p><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</p>
+          <p><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</p>
+          <p> <i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</p>
+          <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
+          <p>
+            <div class="like-bar">
+              <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
+            </div>
+          </p>
+        </div>
       </div>
     </div>{{/videos}}
   </template>
