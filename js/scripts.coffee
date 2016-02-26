@@ -184,8 +184,13 @@
 	$("body")
 		.on "mousemove", ".video-item", (e) ->
 			videoId = $(this).data("videoid")
-			videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
-			videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
+			if $(this).attr("data-state") isnt "fullscreen"
+				console.log "not full"
+				videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
+				videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
+			else 
+				videoPositions[videoId].values.rotateX.to = 0
+				videoPositions[videoId].values.rotateY.to = 0
 		.on "mouseleave", ".video-item", (e) ->
 			videoId = $(this).data("videoid")
 			videoPositions[videoId].values.rotateX.to = 0
@@ -202,18 +207,8 @@
 			.removeClass("active")
 			.css("z-index", "")
 		$(this)
-			.addClass("active started-video")
+			.addClass("active")
 			.css("z-index", 4000)
-
-		# Add youtube embed iframe 
-		if $(this).find(".video-item-video").length is 0
-			$iframe = $("<iframe/>",
-						src: "https://www.youtube.com/embed/#{videoId}"
-						frameborder: 0
-						allowfullscreen: true
-						class: "video-item-video"
-					)
-		$(this).find(".video-item-thumbnail").after $iframe
 
 		# Set this state
 		$(this).attr("data-state", "fullscreen")
@@ -252,6 +247,19 @@
 				output = Mustache.render(template, videoListByKey[videoId])
 				# Render output
 				$(".info-ui").html output
+
+	$("body").on "click", ".video-item.active", () ->
+		videoId = $(this).data("videoid")
+		$(this).addClass("started-video")
+		# Add youtube embed iframe 
+		if $(this).find(".video-item-video").length is 0
+			$iframe = $("<iframe/>",
+						src: "https://www.youtube.com/embed/#{videoId}?autoplay=1"
+						frameborder: 0
+						allowfullscreen: true
+						class: "video-item-video"
+					)
+		$(this).find(".video-item-thumbnail").after $iframe
 
 	# Close fullscreen
 	$(document).on "click", ".close-fullscreen", () ->
@@ -351,8 +359,6 @@
 				## Position for fullscreen
 				pos.values.top.to = $(".items").scrollTop()
 				pos.values.left.to = 0
-				pos.values.rotateX.to = 0
-				pos.values.rotateY.to = 0
 			else
 				## Position for normal position
 				# Set new top position to move towards
@@ -368,7 +374,7 @@
 				newLeftCount = 0
 			else
 				newLeftCount++
-			# Transform
+			# Transform (3d rotate effect)
 			trans = "perspective(1000px) "
 			trans += "rotateX(#{pos.values.rotateX.current}deg) "
 			trans += "rotateY(#{pos.values.rotateY.current}deg)"

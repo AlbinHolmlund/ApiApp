@@ -182,8 +182,14 @@
     $("body").on("mousemove", ".video-item", function(e) {
       var videoId;
       videoId = $(this).data("videoid");
-      videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10;
-      return videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20;
+      if ($(this).attr("data-state") !== "fullscreen") {
+        console.log("not full");
+        videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10;
+        return videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20;
+      } else {
+        videoPositions[videoId].values.rotateX.to = 0;
+        return videoPositions[videoId].values.rotateY.to = 0;
+      }
     }).on("mouseleave", ".video-item", function(e) {
       var videoId;
       videoId = $(this).data("videoid");
@@ -191,19 +197,10 @@
       return videoPositions[videoId].values.rotateY.to = 0;
     });
     $("body").on("click", ".video-item", function() {
-      var $iframe, videoId;
+      var videoId;
       videoId = $(this).data("videoid");
       $(".video-item").removeClass("active").css("z-index", "");
-      $(this).addClass("active started-video").css("z-index", 4000);
-      if ($(this).find(".video-item-video").length === 0) {
-        $iframe = $("<iframe/>", {
-          src: "https://www.youtube.com/embed/" + videoId,
-          frameborder: 0,
-          allowfullscreen: true,
-          "class": "video-item-video"
-        });
-      }
-      $(this).find(".video-item-thumbnail").after($iframe);
+      $(this).addClass("active").css("z-index", 4000);
       $(this).attr("data-state", "fullscreen");
       $("body").addClass("state-fullscreen");
       return $.ajax({
@@ -229,6 +226,20 @@
           return $(".info-ui").html(output);
         }
       });
+    });
+    $("body").on("click", ".video-item.active", function() {
+      var $iframe, videoId;
+      videoId = $(this).data("videoid");
+      $(this).addClass("started-video");
+      if ($(this).find(".video-item-video").length === 0) {
+        $iframe = $("<iframe/>", {
+          src: "https://www.youtube.com/embed/" + videoId + "?autoplay=1",
+          frameborder: 0,
+          allowfullscreen: true,
+          "class": "video-item-video"
+        });
+      }
+      return $(this).find(".video-item-thumbnail").after($iframe);
     });
     $(document).on("click", ".close-fullscreen", function() {
       $(".video-item").removeClass("active");
@@ -309,8 +320,6 @@
         if ($this.attr("data-state") === "fullscreen") {
           pos.values.top.to = $(".items").scrollTop();
           pos.values.left.to = 0;
-          pos.values.rotateX.to = 0;
-          pos.values.rotateY.to = 0;
         } else {
           pos.values.top.to = newTop;
           pos.values.left.to = newLeft;

@@ -166,13 +166,31 @@ body.state-fullscreen .items {
   .video-item p {
     margin: 0;
     margin-bottom: 0.5em; }
+  .video-item .play-button {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 0 3em;
+    border-radius: 5px;
+    background-color: #e74c3c; }
+    .video-item .play-button:after {
+      content: "\f488";
+      font-family: "Ionicons";
+      font-size: 5em;
+      color: #fff; }
   .video-item.active {
     width: 80vw;
     height: 80vh; }
+    .video-item.active .play-button {
+      display: block; }
     .video-item.active .video-item-ui {
       transform: translateY(-100%); }
     .video-item.active .video-item-video {
       opacity: 1; }
+  .video-item.started-video .play-button {
+    display: none; }
   .video-item.started-video .video-item-thumbnail {
     display: none; }
   .video-item.started-video .video-item-video {
@@ -242,11 +260,11 @@ body.state-fullscreen .items {
   position: fixed;
   top: 0;
   right: 0;
-  font-size: 5em;
+  font-size: 4em;
   color: #e74c3c;
   cursor: pointer;
   transform: translateX(100%);
-  transition: all 1s;
+  transition: all 0.3333333333s;
   z-index: 1010; }
   .close-fullscreen:before {
     content: "\f404";
