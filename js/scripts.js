@@ -141,7 +141,7 @@
         }
       });
       return useVideos = function(videos) {
-        var $container, data, output, sortVideos, template;
+        var $container;
         console.log(videos);
         $container = $(".items");
         $container.html("");
@@ -168,18 +168,30 @@
           videos[index].statistics_formated.viewCount = videos[index].statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-          return videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          return $.ajax({
+            url: "https://www.googleapis.com/youtube/v3/channels?id=" + videos[index].snippet.channelId + "&part=snippet&key=" + apiKey,
+            dataType: "jsonp",
+            async: false,
+            success: function(data) {
+              videos[index].user = data;
+              return console.log(data);
+            }
+          });
         });
-        sortVideos = function(a, b) {
-          return b.custom.likeRatio - a.custom.likeRatio;
-        };
-        videos.sort(sortVideos);
-        data = {
-          videos: videos
-        };
-        template = $('[data-template="video-item"]').html();
-        output = Mustache.render(template, data);
-        return $container.append(output);
+        return setTimeout(function() {
+          var data, output, sortVideos, template;
+          sortVideos = function(a, b) {
+            return b.custom.likeRatio - a.custom.likeRatio;
+          };
+          videos.sort(sortVideos);
+          data = {
+            videos: videos
+          };
+          template = $('[data-template="video-item"]').html();
+          output = Mustache.render(template, data);
+          return $container.append(output);
+        }, 2000);
       };
     };
     $("body").on("mousemove", ".video-item", function(e) {
@@ -302,10 +314,10 @@
           $.each(comments, function(index, val) {
             return comments[index] = val;
           });
+          $(".more-comments").remove();
           template = $('[data-template="comments"]').html();
           output = Mustache.render(template, comments);
-          $(".comment-ui .comment-items").append(output);
-          return $(".more-comments").text("Load more comments").removeClass("disabled");
+          return $(".comment-ui .comment-items").append(output);
         }
       });
     });

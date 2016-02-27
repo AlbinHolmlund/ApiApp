@@ -18,7 +18,6 @@
   <div class="items"></div>
   <div class="comment-ui">
     <div class="comment-items"></div>
-    <button class="button more-comments">Load more comments</button>
   </div>
   <div class="close-fullscreen"></div>
   <div class="info-ui"></div>
@@ -38,7 +37,8 @@
             <div class="like-bar">
               <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
             </div>
-          </p>
+          </p>{{#user.items}}
+          <p><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-r"/><strong>{{snippet.title}}</strong></p>{{/user.items}}
         </div>
       </div>
     </div>{{/videos}}
@@ -59,6 +59,8 @@
       </div>
     </div>
     <div class="clear"></div>{{/items}}
+    {{#nextPageToken}}
+    <button class="button more-comments">Load more comments</button>{{/nextPageToken}}
   </template>
   <template data-template="info-ui">
     <h2 class="info-ui-title">

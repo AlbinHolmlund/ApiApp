@@ -167,20 +167,32 @@
 				videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 				videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 
-			# Sort before rendering
-			sortVideos = (a, b) ->
-				return (b.custom.likeRatio - a.custom.likeRatio)
-			videos.sort(sortVideos)
+				# Add user to the object
+				$.ajax
+					url: "https://www.googleapis.com/youtube/v3/channels?id=#{videos[index].snippet.channelId}&part=snippet&key=#{apiKey}"
+					dataType: "jsonp"
+					async: false # Must be run first
+					success: (data) ->
+						# Add user data
+						videos[index].user = data
+						console.log data
 
-			# Render
-			data = 
-				videos: videos
-			# Get template
-			template = $('[data-template="video-item"]').html()
-			# Insert data
-			output = Mustache.render(template, data)
-			# Render output
-			$container.append output
+			setTimeout () ->
+				# Sort before rendering
+				sortVideos = (a, b) ->
+					return (b.custom.likeRatio - a.custom.likeRatio)
+				videos.sort(sortVideos)
+
+				# Render
+				data = 
+					videos: videos
+				# Get template
+				template = $('[data-template="video-item"]').html()
+				# Insert data
+				output = Mustache.render(template, data)
+				# Render output
+				$container.append output
+			, 2000
 
 	## End search function
 
@@ -332,6 +344,8 @@
 				comments = data
 				$.each comments, (index, val) -> 
 					comments[index] = val
+				# Remove button because it will be re-rendered
+				$(".more-comments").remove()
 				## Render comments
 				# Get template
 				template = $('[data-template="comments"]').html()
@@ -339,10 +353,7 @@
 				output = Mustache.render(template, comments)
 				# Render output
 				$(".comment-ui .comment-items").append output
-				# Make button available again
-				$(".more-comments")
-					.text("Load more comments")
-					.removeClass("disabled")
+
 
 	## Function to position videos
 
