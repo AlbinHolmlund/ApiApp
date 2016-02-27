@@ -61,6 +61,26 @@ a{
 	color: $dangerClr;
 }
 
+// Loading bar
+.loading{
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 10px;
+	z-index: 10000;
+	.progress{
+		width: 0;
+		height: 100%;
+		background: $successClr;
+		transition: width 0.2s;
+	}
+	&.active{
+		display: block;
+	}
+}
+
 // Button
 .button{
 	border: 0;

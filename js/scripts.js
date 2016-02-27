@@ -131,6 +131,8 @@
                 };
                 MoveTo.add(pos);
                 videoPositions[val.id.videoId] = pos;
+                $(".loading").addClass("active");
+                $(".loading .progress").css("width", ((60 / items.length) * videoList.length) + "%");
                 if (videoList.length === items.length) {
                   useVideos(videoList);
                   return callback();
@@ -141,11 +143,25 @@
         }
       });
       return useVideos = function(videos) {
-        var $container;
+        var $container, renderVideos, videosAjaxLooped;
         console.log(videos);
         $container = $(".items");
         $container.html("");
-        $.each(videos, function(index, item) {
+        renderVideos = function() {
+          var data, output, sortVideos, template;
+          sortVideos = function(a, b) {
+            return b.custom.likeRatio - a.custom.likeRatio;
+          };
+          videos.sort(sortVideos);
+          data = {
+            videos: videos
+          };
+          template = $('[data-template="video-item"]').html();
+          output = Mustache.render(template, data);
+          return $container.append(output);
+        };
+        videosAjaxLooped = 0;
+        return $.each(videos, function(index, item) {
           videos[index].custom = {
             likeRatio: null,
             likeRatioPercent: null
@@ -160,7 +176,7 @@
           if (!item.statistics.commentCount) {
             item.statistics.commentCount = "0";
           }
-          videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
+          videos[index].custom.likeRatio = Math.round(item.statistics.likeCount / item.statistics.dislikeCount);
           if (!videos[index].custom.likeRatio) {
             videos[index].custom.likeRatio = "0";
           }
@@ -175,23 +191,19 @@
             async: false,
             success: function(data) {
               videos[index].user = data;
-              return console.log(data);
+              console.log(data);
+              $(".loading .progress").css("width", 60 + ((40 / videos.length) * videosAjaxLooped) + "%");
+              videosAjaxLooped++;
+              if (videosAjaxLooped === videos.length) {
+                renderVideos();
+                return setTimeout(function() {
+                  $(".loading").removeClass("active");
+                  return $(".loading .progress").css("width", 0);
+                }, 200);
+              }
             }
           });
         });
-        return setTimeout(function() {
-          var data, output, sortVideos, template;
-          sortVideos = function(a, b) {
-            return b.custom.likeRatio - a.custom.likeRatio;
-          };
-          videos.sort(sortVideos);
-          data = {
-            videos: videos
-          };
-          template = $('[data-template="video-item"]').html();
-          output = Mustache.render(template, data);
-          return $container.append(output);
-        }, 2000);
       };
     };
     $("body").on("mousemove", ".video-item", function(e) {

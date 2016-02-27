@@ -43,6 +43,22 @@ a, a:active, a:link, a:hover, a:focus {
 .clr-danger {
   color: #e74c3c; }
 
+.loading {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  z-index: 10000; }
+  .loading .progress {
+    width: 0;
+    height: 100%;
+    background: #40d47e;
+    transition: width 0.2s; }
+  .loading.active {
+    display: block; }
+
 .button {
   border: 0;
   outline: 0;

@@ -25,6 +25,9 @@
 		# We have token! :D
 	###
 
+	# Ajax fix test
+
+
 	# The sacred api key
 	apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk"
 	commentsNextPageToken = false
@@ -128,6 +131,10 @@
 							MoveTo.add(pos)
 							videoPositions[val.id.videoId] = pos
 
+							# Add to progressbar
+							$(".loading").addClass "active"
+							$(".loading .progress").css "width", ((60/items.length) * videoList.length) + "%"
+
 							# If this is the last result, run function that uses the videos
 							if videoList.length is items.length
 								useVideos(videoList)
@@ -139,7 +146,26 @@
 			# List videos in the ui
 			$container = $(".items") # The container
 			$container.html("") # Clear container
+
+			# The sort/render function that will be run when all videos are done looping through and all ajaxes are done
+			renderVideos = () ->
+				# Sort before rendering
+				sortVideos = (a, b) ->
+					return (b.custom.likeRatio - a.custom.likeRatio)
+				videos.sort(sortVideos)
+
+				# Render
+				data = 
+					videos: videos
+				# Get template
+				template = $('[data-template="video-item"]').html()
+				# Insert data
+				output = Mustache.render(template, data)
+				# Render output
+				$container.append output
+
 			# Loop through all videos
+			videosAjaxLooped = 0 # How many ajaxes has finished
 			$.each videos, (index, item) ->
 				## Edit data before rendering
 				videos[index].custom = {
@@ -157,7 +183,7 @@
 					 item.statistics.commentCount = "0"
 
 				# Calculate new data
-				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )
+				videos[index].custom.likeRatio = Math.round( item.statistics.likeCount / item.statistics.dislikeCount )
 				if !videos[index].custom.likeRatio then videos[index].custom.likeRatio = "0"
 				videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100
 
@@ -176,23 +202,17 @@
 						# Add user data
 						videos[index].user = data
 						console.log data
-
-			setTimeout () ->
-				# Sort before rendering
-				sortVideos = (a, b) ->
-					return (b.custom.likeRatio - a.custom.likeRatio)
-				videos.sort(sortVideos)
-
-				# Render
-				data = 
-					videos: videos
-				# Get template
-				template = $('[data-template="video-item"]').html()
-				# Insert data
-				output = Mustache.render(template, data)
-				# Render output
-				$container.append output
-			, 2000
+						# Add to progressbar
+						$(".loading .progress").css "width", 60 + ((40/videos.length) * videosAjaxLooped) + "%"
+						# Check if this is the last ajax call
+						videosAjaxLooped++
+						if videosAjaxLooped is videos.length
+							renderVideos()
+							# Clear loading bar
+							setTimeout () ->
+								$(".loading").removeClass "active"
+								$(".loading .progress").css "width", 0
+							, 200
 
 	## End search function
 
