@@ -103,16 +103,17 @@
 			dataType: "jsonp"
 			success: (data) ->
 				items = data.items
-				console.log data
+				console.log "All videos: ", data
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
 						url: "https://www.googleapis.com/youtube/v3/videos?id=#{val.id.videoId}&part=snippet,statistics&key=#{apiKey}"
 						dataType: "jsonp"
+						async: false
 						success: (data) -> 
 							# Add video to list
 							videoListByKey[val.id.videoId] = data.items[0]
-							videoList.push(data.items[0])
+							videoList[index] = data.items[0]
 							# Create video position
 							pos = 
 								state: false
@@ -143,7 +144,6 @@
 								callback()
 		# Use videos
 		useVideos = (videos) -> 
-			console.log videos # For testing
 			# List videos in the ui
 			$container = $(".items") # The container
 			$container.html("") # Clear container
@@ -151,9 +151,9 @@
 			# The sort/render function that will be run when all videos are done looping through and all ajaxes are done
 			renderVideos = () ->
 				# Sort before rendering
-				sortVideos = (a, b) ->
+				###sortVideos = (a, b) ->
 					return (b.custom.likeRatio - a.custom.likeRatio)
-				videos.sort(sortVideos)
+				videos.sort(sortVideos)###
 
 				# Render
 				data = 
@@ -206,7 +206,7 @@
 					success: (data) ->
 						# Add user data
 						videos[index].user = data
-						console.log data
+						console.log "User: ", data
 						# Add to progressbar
 						$(".loading .progress").css "width", 60 + ((40/videos.length) * videosAjaxLooped) + "%"
 						# Check if this is the last ajax call
@@ -265,6 +265,7 @@
 			url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=#{videoId}&part=snippet,replies&order=relevance&maxResults=10&key=#{apiKey}"
 			dataType: "jsonp"
 			success: (data) ->
+				console.log "Comments: ", data
 				## Set next page token
 				if data.nextPageToken
 					commentsNextPageToken = data.nextPageToken

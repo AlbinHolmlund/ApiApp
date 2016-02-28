@@ -99,15 +99,16 @@
         success: function(data) {
           var items;
           items = data.items;
-          console.log(data);
+          console.log("All videos: ", data);
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
               dataType: "jsonp",
+              async: false,
               success: function(data) {
                 var pos;
                 videoListByKey[val.id.videoId] = data.items[0];
-                videoList.push(data.items[0]);
+                videoList[index] = data.items[0];
                 pos = {
                   state: false,
                   values: {
@@ -144,15 +145,15 @@
       });
       return useVideos = function(videos) {
         var $container, renderVideos, videosAjaxLooped;
-        console.log(videos);
         $container = $(".items");
         $container.html("");
         renderVideos = function() {
-          var data, output, sortVideos, template;
-          sortVideos = function(a, b) {
-            return b.custom.likeRatio - a.custom.likeRatio;
-          };
-          videos.sort(sortVideos);
+
+          /*sortVideos = (a, b) ->
+          					return (b.custom.likeRatio - a.custom.likeRatio)
+          				videos.sort(sortVideos)
+           */
+          var data, output, template;
           data = {
             videos: videos
           };
@@ -192,7 +193,7 @@
             async: false,
             success: function(data) {
               videos[index].user = data;
-              console.log(data);
+              console.log("User: ", data);
               $(".loading .progress").css("width", 60 + ((40 / videos.length) * videosAjaxLooped) + "%");
               videosAjaxLooped++;
               if (videosAjaxLooped === videos.length) {
@@ -237,6 +238,7 @@
         dataType: "jsonp",
         success: function(data) {
           var comments, output, template;
+          console.log("Comments: ", data);
           if (data.nextPageToken) {
             commentsNextPageToken = data.nextPageToken;
           } else {

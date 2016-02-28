@@ -234,7 +234,7 @@ body.state-fullscreen .items {
   z-index: 1000; }
   .comment-ui .comment-item {
     margin-bottom: 30px; }
-    .comment-ui .comment-item .comment-profile {
+    .comment-ui .comment-item .comment-profile, .comment-ui .comment-item .comment-profile-small {
       float: left;
       margin-right: 20px;
       width: 50px;
@@ -242,6 +242,9 @@ body.state-fullscreen .items {
       background-size: cover;
       background-position: center;
       border-radius: 50%; }
+      .comment-ui .comment-item .comment-profile-small {
+        width: 40px;
+        height: 40px; }
     .comment-ui .comment-item .comment-name {
       font-weight: 300; }
     .comment-ui .comment-item .comment-text {
