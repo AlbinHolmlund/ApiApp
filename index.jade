@@ -58,22 +58,24 @@ body
 					i.m-r.icon.ion-eye
 					| {{statistics_formated.viewCount}}
 				p
-					i.m-r.icon.ion-thumbsup.clr-success
-					| {{statistics_formated.likeCount}}
-				p
-					i.m-r.icon.ion-thumbsdown.clr-danger
-					| {{statistics_formated.dislikeCount}}
-				p 
-					i.m-r.icon.ion-ios-chatbubble
-					| {{statistics_formated.commentCount}}
+					span.m-r
+						i.m-r.icon.ion-thumbsup.clr-success
+						| {{statistics_formated.likeCount}}
+					span.m-r
+						i.m-r.icon.ion-thumbsdown.clr-danger
+						| {{statistics_formated.dislikeCount}}
+					span.m-r
+						i.m-r.icon.ion-ios-chatbubble
+						| {{statistics_formated.commentCount}}
 				p #[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] {{custom.likeRatio}} times more likes than dislikes.
 				p
 					.like-bar
 						.like-percent(style="width: {{custom.likeRatioPercent}}%;")
 				| {{#user.items}}
-				p
-					img.m-r(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
-					strong {{snippet.title}}
+				.video-item-profile
+					a(href="#")
+						strong {{snippet.title}}
+						img.m-l(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
 				| {{/user.items}}
 
 		| {{/videos}}
@@ -143,3 +145,11 @@ body
 		p
 			| #[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] 
 			| {{custom.likeRatio}} times more likes than dislikes.
+		p
+			| {{{custom.description}}}
+		.info-ui-right
+			| {{#user.items}}
+			a(href="#")
+				strong {{snippet.title}}
+				img.m-l(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
+			| {{/user.items}}

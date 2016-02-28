@@ -98,6 +98,7 @@
 		settings = "type=video&maxResults=50&order=relevance" #(maxResults = 8)
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=#{query}&#{settings}&key=#{apiKey}"
+			#url: "https://www.googleapis.com/youtube/v3/search?forUsername=#{query}&part=snippet&order=date&maxResults=50&key=#{apiKey}"
 			#url: "https://www.googleapis.com/youtube/v3/videos/getRating?id=6xIRT0huiuA&access_token=#{accessToken}"
 			dataType: "jsonp"
 			success: (data) ->
@@ -193,6 +194,10 @@
 				videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 				videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 
+				## Fix description
+				# Add line breaks
+				videos[index].custom.description = videos[index].snippet.description.replace(/\n/g,"<br>");;
+
 				# Add user to the object
 				$.ajax
 					url: "https://www.googleapis.com/youtube/v3/channels?id=#{videos[index].snippet.channelId}&part=snippet&key=#{apiKey}"
@@ -251,6 +256,9 @@
 
 		# Show other ui
 		$("body").addClass("state-fullscreen")
+
+		# Trigger mousemove event to remove 3d rotation
+		$(this).mousemove()
 
 		# Populate comment ui with comments
 		$.ajax

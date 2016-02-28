@@ -32,16 +32,14 @@
         <div class="video-item-ui">
           <h2 class="video-item-heading">{{snippet.title}}</h2>
           <p><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</p>
-          <p><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</p>
-          <p><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</p>
-          <p> <i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</p>
+          <p><span class="m-r"><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</span><span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</span></p>
           <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
           <p>
             <div class="like-bar">
               <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
             </div>
           </p>{{#user.items}}
-          <p><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-r"/><strong>{{snippet.title}}</strong></p>{{/user.items}}
+          <div class="video-item-profile"><a href="#"><strong>{{snippet.title}}</strong><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-l"/></a></div>{{/user.items}}
         </div>
       </div>
     </div>{{/videos}}
@@ -75,5 +73,7 @@
     </div>
     <p><span class="m-r"><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</span><span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</span></p>
     <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
+    <p>{{{custom.description}}}</p>
+    <div class="info-ui-right">{{#user.items}}<a href="#"><strong>{{snippet.title}}</strong><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-l"/></a>{{/user.items}}</div>
   </template>
 </body>

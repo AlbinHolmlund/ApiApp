@@ -7,6 +7,8 @@ $highestLayer: 1000;
 $successClr: #40d47e;
 $dangerClr: #e74c3c;
 
+$commentUiWidth: 450px;
+
 // Base CSS
 *{
 	box-sizing: border-box;
@@ -236,6 +238,11 @@ $dur: 1s;
 		transform: translateZ(5px); // Forced hardware acceleration
 		transition: all $dur;
 	}
+	&-profile{
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+	}
 	&-heading{
 		margin: 0;
 		margin-bottom: 0.5em;
@@ -263,7 +270,7 @@ $dur: 1s;
 	}
 	// State
 	&.active{
-		width: 80vw;
+		width: calc(100% - #{$commentUiWidth}); // 80vw;
 		height: 80vh;
 		.play-button{
 			display: block;
@@ -295,7 +302,7 @@ $commentUiPad: 20px;
 	top: 0;
 	right: 0;
 	bottom: 0;
-	width: 20%;
+	width: $commentUiWidth; // 20%;
 	padding: $commentUiPad;
 	padding-right: $commentUiPad*2 + 30px;
 	background: #252525;
@@ -337,7 +344,7 @@ $commentUiPad: 20px;
 	position: absolute;
 	bottom: 0;
 	left: 0;
-	width: 80vw;
+	width: calc(100% - #{$commentUiWidth}); // 80vw;
 	height: 20vh;
 	padding: 40px;
 	background: lighten(#252525, 5);
@@ -354,6 +361,11 @@ $commentUiPad: 20px;
 		margin-bottom: 20px;
 		font-size: 2em;
 		font-weight: 100;
+	}
+	&-right{
+		position: absolute;
+		top: 40px;
+		right: 40px;
 	}
 	p{
 		margin: 0;

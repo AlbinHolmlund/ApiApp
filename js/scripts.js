@@ -185,6 +185,7 @@
           videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          videos[index].custom.description = videos[index].snippet.description.replace(/\n/g, "<br>");
           return $.ajax({
             url: "https://www.googleapis.com/youtube/v3/channels?id=" + videos[index].snippet.channelId + "&part=snippet&key=" + apiKey,
             dataType: "jsonp",
@@ -230,6 +231,7 @@
       $(this).addClass("active").css("z-index", 4000);
       $(this).attr("data-state", "fullscreen");
       $("body").addClass("state-fullscreen");
+      $(this).mousemove();
       return $.ajax({
         url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet,replies&order=relevance&maxResults=10&key=" + apiKey,
         dataType: "jsonp",
