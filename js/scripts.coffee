@@ -25,6 +25,9 @@
 		# We have token! :D
 	###
 
+	# Ajax fix test
+
+
 	# The sacred api key
 	apiKey = "AIzaSyBNbJt0Tunt5MEVt0x5TxZRNXcseci9TEk"
 	commentsNextPageToken = false
@@ -86,9 +89,12 @@
 		.on "blur", "[data-search]", () ->
 			$(this).closest(".search").addClass "has-searched"
 
-
 	# Search and render result
 	search = (query, callback) -> 
+		# Resets
+		videoList = [] # This array will be populated with videos
+		videoListByKey = {} # Same as videoList but with id as key
+		# Settings
 		settings = "type=video&maxResults=50&order=relevance" #(maxResults = 8)
 		$.ajax
 			url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=#{query}&#{settings}&key=#{apiKey}"
@@ -96,6 +102,7 @@
 			dataType: "jsonp"
 			success: (data) ->
 				items = data.items
+				console.log data
 				# Loop through items and gather info
 				$.each items, (index, val) -> 
 					$.ajax
@@ -124,6 +131,10 @@
 							MoveTo.add(pos)
 							videoPositions[val.id.videoId] = pos
 
+							# Add to progressbar
+							$(".loading").addClass "active"
+							$(".loading .progress").css "width", ((60/items.length) * videoList.length) + "%"
+
 							# If this is the last result, run function that uses the videos
 							if videoList.length is items.length
 								useVideos(videoList)
@@ -135,7 +146,26 @@
 			# List videos in the ui
 			$container = $(".items") # The container
 			$container.html("") # Clear container
+
+			# The sort/render function that will be run when all videos are done looping through and all ajaxes are done
+			renderVideos = () ->
+				# Sort before rendering
+				sortVideos = (a, b) ->
+					return (b.custom.likeRatio - a.custom.likeRatio)
+				videos.sort(sortVideos)
+
+				# Render
+				data = 
+					videos: videos
+				# Get template
+				template = $('[data-template="video-item"]').html()
+				# Insert data
+				output = Mustache.render(template, data)
+				# Render output
+				$container.append output
+
 			# Loop through all videos
+			videosAjaxLooped = 0 # How many ajaxes has finished
 			$.each videos, (index, item) ->
 				## Edit data before rendering
 				videos[index].custom = {
@@ -146,14 +176,15 @@
 
 				# Check if likes/dislike exists
 				if !item.statistics.likeCount
-					 item.statistics.likeCount = 0
+					 item.statistics.likeCount = "0"
 				if !item.statistics.dislikeCount
-					 item.statistics.dislikeCount = 0
+					 item.statistics.dislikeCount = "0"
 				if !item.statistics.commentCount
-					 item.statistics.commentCount = 0
+					 item.statistics.commentCount = "0"
 
 				# Calculate new data
-				videos[index].custom.likeRatio = Math.ceil( item.statistics.likeCount / item.statistics.dislikeCount )
+				videos[index].custom.likeRatio = Math.round( item.statistics.likeCount / item.statistics.dislikeCount )
+				if !videos[index].custom.likeRatio then videos[index].custom.likeRatio = "0"
 				videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100
 
 				# Make spaces in numbers
@@ -162,20 +193,26 @@
 				videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 				videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 
-			# Sort before rendering
-			sortVideos = (a, b) ->
-				return (b.custom.likeRatio - a.custom.likeRatio)
-			videos.sort(sortVideos)
-
-			# Render
-			data = 
-				videos: videos
-			# Get template
-			template = $('[data-template="video-item"]').html()
-			# Insert data
-			output = Mustache.render(template, data)
-			# Render output
-			$container.append output
+				# Add user to the object
+				$.ajax
+					url: "https://www.googleapis.com/youtube/v3/channels?id=#{videos[index].snippet.channelId}&part=snippet&key=#{apiKey}"
+					dataType: "jsonp"
+					async: false # Must be run first
+					success: (data) ->
+						# Add user data
+						videos[index].user = data
+						console.log data
+						# Add to progressbar
+						$(".loading .progress").css "width", 60 + ((40/videos.length) * videosAjaxLooped) + "%"
+						# Check if this is the last ajax call
+						videosAjaxLooped++
+						if videosAjaxLooped is videos.length
+							renderVideos()
+							# Clear loading bar
+							setTimeout () ->
+								$(".loading").removeClass "active"
+								$(".loading .progress").css "width", 0
+							, 200
 
 	## End search function
 
@@ -183,8 +220,13 @@
 	$("body")
 		.on "mousemove", ".video-item", (e) ->
 			videoId = $(this).data("videoid")
-			videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
-			videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
+			if $(this).attr("data-state") isnt "fullscreen"
+				console.log "not full"
+				videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10
+				videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20
+			else 
+				videoPositions[videoId].values.rotateX.to = 0
+				videoPositions[videoId].values.rotateY.to = 0
 		.on "mouseleave", ".video-item", (e) ->
 			videoId = $(this).data("videoid")
 			videoPositions[videoId].values.rotateX.to = 0
@@ -201,18 +243,8 @@
 			.removeClass("active")
 			.css("z-index", "")
 		$(this)
-			.addClass("active started-video")
+			.addClass("active")
 			.css("z-index", 4000)
-
-		# Add youtube embed iframe 
-		if $(this).find(".video-item-video").length is 0
-			$iframe = $("<iframe/>",
-						src: "https://www.youtube.com/embed/#{videoId}"
-						frameborder: 0
-						allowfullscreen: true
-						class: "video-item-video"
-					)
-		$(this).find(".video-item-thumbnail").after $iframe
 
 		# Set this state
 		$(this).attr("data-state", "fullscreen")
@@ -251,6 +283,19 @@
 				output = Mustache.render(template, videoListByKey[videoId])
 				# Render output
 				$(".info-ui").html output
+
+	$("body").on "click", ".video-item.active", () ->
+		videoId = $(this).data("videoid")
+		$(this).addClass("started-video")
+		# Add youtube embed iframe 
+		if $(this).find(".video-item-video").length is 0
+			$iframe = $("<iframe/>",
+						src: "https://www.youtube.com/embed/#{videoId}?autoplay=1"
+						frameborder: 0
+						allowfullscreen: true
+						class: "video-item-video"
+					)
+		$(this).find(".video-item-thumbnail").after $iframe
 
 	# Close fullscreen
 	$(document).on "click", ".close-fullscreen", () ->
@@ -319,6 +364,8 @@
 				comments = data
 				$.each comments, (index, val) -> 
 					comments[index] = val
+				# Remove button because it will be re-rendered
+				$(".more-comments").remove()
 				## Render comments
 				# Get template
 				template = $('[data-template="comments"]').html()
@@ -326,10 +373,7 @@
 				output = Mustache.render(template, comments)
 				# Render output
 				$(".comment-ui .comment-items").append output
-				# Make button available again
-				$(".more-comments")
-					.text("Load more comments")
-					.removeClass("disabled")
+
 
 	## Function to position videos
 
@@ -350,8 +394,6 @@
 				## Position for fullscreen
 				pos.values.top.to = $(".items").scrollTop()
 				pos.values.left.to = 0
-				pos.values.rotateX.to = 0
-				pos.values.rotateY.to = 0
 			else
 				## Position for normal position
 				# Set new top position to move towards
@@ -367,7 +409,7 @@
 				newLeftCount = 0
 			else
 				newLeftCount++
-			# Transform
+			# Transform (3d rotate effect)
 			trans = "perspective(1000px) "
 			trans += "rotateX(#{pos.values.rotateX.current}deg) "
 			trans += "rotateY(#{pos.values.rotateY.current}deg)"

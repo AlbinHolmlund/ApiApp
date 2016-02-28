@@ -12,13 +12,15 @@
   <script type="text/javascript" src="js/scripts.js"></script>
 </head>
 <body>
+  <div class="loading">
+    <div class="progress"></div>
+  </div>
   <div class="search">
     <input data-search="data-search" placeholder="Search for something awesome..."/><span></span>
   </div>
   <div class="items"></div>
   <div class="comment-ui">
     <div class="comment-items"></div>
-    <button class="button more-comments">Load more comments</button>
   </div>
   <div class="close-fullscreen"></div>
   <div class="info-ui"></div>
@@ -26,6 +28,7 @@
     <div data-videoid="{{id}}" class="video-item">
       <div class="video-item-inner">
         <div style="background-image: url({{snippet.thumbnails.high.url}});" class="video-item-thumbnail"></div>
+        <div class="play-button"></div>
         <div class="video-item-ui">
           <h2 class="video-item-heading">{{snippet.title}}</h2>
           <p><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</p>
@@ -37,7 +40,8 @@
             <div class="like-bar">
               <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
             </div>
-          </p>
+          </p>{{#user.items}}
+          <p><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-r"/><strong>{{snippet.title}}</strong></p>{{/user.items}}
         </div>
       </div>
     </div>{{/videos}}
@@ -58,6 +62,8 @@
       </div>
     </div>
     <div class="clear"></div>{{/items}}
+    {{#nextPageToken}}
+    <button class="button more-comments">Load more comments</button>{{/nextPageToken}}
   </template>
   <template data-template="info-ui">
     <h2 class="info-ui-title">

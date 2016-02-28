@@ -90,6 +90,8 @@
     });
     search = function(query, callback) {
       var settings, useVideos;
+      videoList = [];
+      videoListByKey = {};
       settings = "type=video&maxResults=50&order=relevance";
       $.ajax({
         url: "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + query + "&" + settings + "&key=" + apiKey,
@@ -97,6 +99,7 @@
         success: function(data) {
           var items;
           items = data.items;
+          console.log(data);
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
@@ -128,6 +131,8 @@
                 };
                 MoveTo.add(pos);
                 videoPositions[val.id.videoId] = pos;
+                $(".loading").addClass("active");
+                $(".loading .progress").css("width", ((60 / items.length) * videoList.length) + "%");
                 if (videoList.length === items.length) {
                   useVideos(videoList);
                   return callback();
@@ -138,49 +143,80 @@
         }
       });
       return useVideos = function(videos) {
-        var $container, data, output, sortVideos, template;
+        var $container, renderVideos, videosAjaxLooped;
         console.log(videos);
         $container = $(".items");
         $container.html("");
-        $.each(videos, function(index, item) {
+        renderVideos = function() {
+          var data, output, sortVideos, template;
+          sortVideos = function(a, b) {
+            return b.custom.likeRatio - a.custom.likeRatio;
+          };
+          videos.sort(sortVideos);
+          data = {
+            videos: videos
+          };
+          template = $('[data-template="video-item"]').html();
+          output = Mustache.render(template, data);
+          return $container.append(output);
+        };
+        videosAjaxLooped = 0;
+        return $.each(videos, function(index, item) {
           videos[index].custom = {
             likeRatio: null,
             likeRatioPercent: null
           };
           videos[index].statistics_formated = {};
           if (!item.statistics.likeCount) {
-            item.statistics.likeCount = 0;
+            item.statistics.likeCount = "0";
           }
           if (!item.statistics.dislikeCount) {
-            item.statistics.dislikeCount = 0;
+            item.statistics.dislikeCount = "0";
           }
           if (!item.statistics.commentCount) {
-            item.statistics.commentCount = 0;
+            item.statistics.commentCount = "0";
           }
-          videos[index].custom.likeRatio = Math.ceil(item.statistics.likeCount / item.statistics.dislikeCount);
+          videos[index].custom.likeRatio = Math.round(item.statistics.likeCount / item.statistics.dislikeCount);
+          if (!videos[index].custom.likeRatio) {
+            videos[index].custom.likeRatio = "0";
+          }
           videos[index].custom.likeRatioPercent = (parseInt(item.statistics.likeCount) / (parseInt(item.statistics.likeCount) + parseInt(item.statistics.dislikeCount))) * 100;
           videos[index].statistics_formated.viewCount = videos[index].statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-          return videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          return $.ajax({
+            url: "https://www.googleapis.com/youtube/v3/channels?id=" + videos[index].snippet.channelId + "&part=snippet&key=" + apiKey,
+            dataType: "jsonp",
+            async: false,
+            success: function(data) {
+              videos[index].user = data;
+              console.log(data);
+              $(".loading .progress").css("width", 60 + ((40 / videos.length) * videosAjaxLooped) + "%");
+              videosAjaxLooped++;
+              if (videosAjaxLooped === videos.length) {
+                renderVideos();
+                return setTimeout(function() {
+                  $(".loading").removeClass("active");
+                  return $(".loading .progress").css("width", 0);
+                }, 200);
+              }
+            }
+          });
         });
-        sortVideos = function(a, b) {
-          return b.custom.likeRatio - a.custom.likeRatio;
-        };
-        videos.sort(sortVideos);
-        data = {
-          videos: videos
-        };
-        template = $('[data-template="video-item"]').html();
-        output = Mustache.render(template, data);
-        return $container.append(output);
       };
     };
     $("body").on("mousemove", ".video-item", function(e) {
       var videoId;
       videoId = $(this).data("videoid");
-      videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10;
-      return videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20;
+      if ($(this).attr("data-state") !== "fullscreen") {
+        console.log("not full");
+        videoPositions[videoId].values.rotateX.to = -(e.pageY - $(this).centerTop()) / 10;
+        return videoPositions[videoId].values.rotateY.to = (e.pageX - $(this).centerLeft()) / 20;
+      } else {
+        videoPositions[videoId].values.rotateX.to = 0;
+        return videoPositions[videoId].values.rotateY.to = 0;
+      }
     }).on("mouseleave", ".video-item", function(e) {
       var videoId;
       videoId = $(this).data("videoid");
@@ -188,19 +224,10 @@
       return videoPositions[videoId].values.rotateY.to = 0;
     });
     $("body").on("click", ".video-item", function() {
-      var $iframe, videoId;
+      var videoId;
       videoId = $(this).data("videoid");
       $(".video-item").removeClass("active").css("z-index", "");
-      $(this).addClass("active started-video").css("z-index", 4000);
-      if ($(this).find(".video-item-video").length === 0) {
-        $iframe = $("<iframe/>", {
-          src: "https://www.youtube.com/embed/" + videoId,
-          frameborder: 0,
-          allowfullscreen: true,
-          "class": "video-item-video"
-        });
-      }
-      $(this).find(".video-item-thumbnail").after($iframe);
+      $(this).addClass("active").css("z-index", 4000);
       $(this).attr("data-state", "fullscreen");
       $("body").addClass("state-fullscreen");
       return $.ajax({
@@ -226,6 +253,20 @@
           return $(".info-ui").html(output);
         }
       });
+    });
+    $("body").on("click", ".video-item.active", function() {
+      var $iframe, videoId;
+      videoId = $(this).data("videoid");
+      $(this).addClass("started-video");
+      if ($(this).find(".video-item-video").length === 0) {
+        $iframe = $("<iframe/>", {
+          src: "https://www.youtube.com/embed/" + videoId + "?autoplay=1",
+          frameborder: 0,
+          allowfullscreen: true,
+          "class": "video-item-video"
+        });
+      }
+      return $(this).find(".video-item-thumbnail").after($iframe);
     });
     $(document).on("click", ".close-fullscreen", function() {
       $(".video-item").removeClass("active");
@@ -285,10 +326,10 @@
           $.each(comments, function(index, val) {
             return comments[index] = val;
           });
+          $(".more-comments").remove();
           template = $('[data-template="comments"]').html();
           output = Mustache.render(template, comments);
-          $(".comment-ui .comment-items").append(output);
-          return $(".more-comments").text("Load more comments").removeClass("disabled");
+          return $(".comment-ui .comment-items").append(output);
         }
       });
     });
@@ -306,8 +347,6 @@
         if ($this.attr("data-state") === "fullscreen") {
           pos.values.top.to = $(".items").scrollTop();
           pos.values.left.to = 0;
-          pos.values.rotateX.to = 0;
-          pos.values.rotateY.to = 0;
         } else {
           pos.values.top.to = newTop;
           pos.values.left.to = newLeft;

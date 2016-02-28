@@ -23,6 +23,9 @@ head
 	//- Custom scripts
 	script(type="text/javascript", src="js/scripts.js")
 body
+	//- Loading bar
+	.loading: .progress
+
 	//- Search bar
 	.search
 		input(data-search, placeholder="Search for something awesome...")
@@ -34,7 +37,6 @@ body
 	//- Comment ui
 	.comment-ui
 		.comment-items
-		button.button.more-comments Load more comments
 	.close-fullscreen
 
 	//- Info ui
@@ -47,6 +49,8 @@ body
 		.video-item(data-videoid="{{id}}"): .video-item-inner
 			//- Thumbnail
 			.video-item-thumbnail(style="background-image: url({{snippet.thumbnails.high.url}});")
+			//- Play button
+			.play-button
 			//- Info
 			.video-item-ui
 				h2.video-item-heading {{snippet.title}}
@@ -66,6 +70,11 @@ body
 				p
 					.like-bar
 						.like-percent(style="width: {{custom.likeRatioPercent}}%;")
+				| {{#user.items}}
+				p
+					img.m-r(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
+					strong {{snippet.title}}
+				| {{/user.items}}
 
 		| {{/videos}}
 
@@ -108,6 +117,10 @@ body
 
 		| {{/items}}
 
+		| {{#nextPageToken}}
+		button.button.more-comments Load more comments
+		| {{/nextPageToken}}
+
 	//- Info ui
 	template(data-template="info-ui")
 		h2.info-ui-title 
@@ -128,5 +141,5 @@ body
 				i.m-r.icon.ion-ios-chatbubble
 				| {{statistics_formated.commentCount}}
 		p
-			#[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] 
+			| #[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] 
 			| {{custom.likeRatio}} times more likes than dislikes.

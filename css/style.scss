@@ -61,6 +61,26 @@ a{
 	color: $dangerClr;
 }
 
+// Loading bar
+.loading{
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 10px;
+	z-index: 10000;
+	.progress{
+		width: 0;
+		height: 100%;
+		background: $successClr;
+		transition: width 0.2s;
+	}
+	&.active{
+		display: block;
+	}
+}
+
 // Button
 .button{
 	border: 0;
@@ -194,7 +214,7 @@ $dur: 1s;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		opacity: 0.5;
+		opacity: 0.4; // (0.5)
 	}
 	&-video{
 		display: none;
@@ -213,6 +233,7 @@ $dur: 1s;
 		width: 100%;
 		height: 100%;
 		padding: 20px;
+		transform: translateZ(5px); // Forced hardware acceleration
 		transition: all $dur;
 	}
 	&-heading{
@@ -223,10 +244,30 @@ $dur: 1s;
 		margin: 0;
 		margin-bottom: 0.5em;
 	}
+	.play-button{
+		display: none;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+
+		padding: 0 3em;
+		border-radius: 5px;
+		background-color: $dangerClr;
+		&:after{
+			content: "\f488";
+			font-family: "Ionicons";
+			font-size: 5em;
+			color: #fff;
+		}
+	}
 	// State
 	&.active{
 		width: 80vw;
 		height: 80vh;
+		.play-button{
+			display: block;
+		}
 		.video-item-ui{
 			transform: translateY(-100%);
 		}
@@ -235,6 +276,9 @@ $dur: 1s;
 		}
 	}
 	&.started-video{
+		.play-button{
+			display: none;
+		}
 		.video-item-thumbnail{
 			display: none;
 		}
@@ -320,11 +364,11 @@ $commentUiPad: 20px;
 	position: fixed;
 	top: 0;
 	right: 0;
-	font-size: 5em;
+	font-size: 4em;
 	color: $mainClr;
 	cursor: pointer;
 	transform: translateX(100%);
-	transition: all $dur;
+	transition: all $dur/3;
 	z-index: $highestLayer + 10;
 	&:before{
 		content: "\f404";
