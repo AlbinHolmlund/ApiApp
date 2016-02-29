@@ -79,7 +79,8 @@
       if (event.which === 13) {
         val = $(this).val();
         return search(val, function() {
-          return $("[data-search]").blur();
+          $("[data-search]").blur();
+          return $("[data-search]").closest(".search").removeClass("first-search");
         });
       }
     });
