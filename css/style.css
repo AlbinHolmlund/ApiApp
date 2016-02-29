@@ -112,11 +112,11 @@ a, a:active, a:link, a:hover, a:focus {
     box-shadow: 0 0 0 20px rgba(242, 159, 151, 0.2), 0 0 0 40px rgba(237, 118, 105, 0.2), 0 0 0 60px rgba(231, 76, 60, 0.2); }
   .search span {
     display: none; }
-  .search.has-searched {
+  .search.has-searched:not(.first-search) {
     top: 40px;
     transform-origin: center 0;
     transform: translate(-50%, 0%); }
-    .search.has-searched input {
+    .search.has-searched:not(.first-search) input {
       cursor: pointer;
       opacity: 0.4;
       transform: scale(0.5);

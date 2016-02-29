@@ -82,7 +82,8 @@
 			val = $(this).val()
 			# Search
 			search val, () ->
-				$("[data-search]").blur()
+				$("[data-search]").blur() # Remove focus
+				$("[data-search]").closest(".search").removeClass("first-search") # Clear first search
 	$(document)
 		.on "focus", "[data-search]", () ->
 			$(this).closest(".search").removeClass "has-searched"
