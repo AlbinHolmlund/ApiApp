@@ -36,6 +36,8 @@ body
 
 	//- Comment ui
 	.comment-ui
+		p
+			strong Comments
 		.comment-items
 	.close-fullscreen
 
@@ -58,22 +60,24 @@ body
 					i.m-r.icon.ion-eye
 					| {{statistics_formated.viewCount}}
 				p
-					i.m-r.icon.ion-thumbsup.clr-success
-					| {{statistics_formated.likeCount}}
-				p
-					i.m-r.icon.ion-thumbsdown.clr-danger
-					| {{statistics_formated.dislikeCount}}
-				p 
-					i.m-r.icon.ion-ios-chatbubble
-					| {{statistics_formated.commentCount}}
+					span.m-r
+						i.m-r.icon.ion-thumbsup.clr-success
+						| {{statistics_formated.likeCount}}
+					span.m-r
+						i.m-r.icon.ion-thumbsdown.clr-danger
+						| {{statistics_formated.dislikeCount}}
+					span.m-r
+						i.m-r.icon.ion-ios-chatbubble
+						| {{statistics_formated.commentCount}}
 				p #[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] {{custom.likeRatio}} times more likes than dislikes.
 				p
 					.like-bar
 						.like-percent(style="width: {{custom.likeRatioPercent}}%;")
 				| {{#user.items}}
-				p
-					img.m-r(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
-					strong {{snippet.title}}
+				.video-item-profile
+					a(href="http://youtube.com/channel/{{id}}", target="_blank")
+						strong {{snippet.title}}
+						img.m-l(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
 				| {{/user.items}}
 
 		| {{/videos}}
@@ -81,7 +85,6 @@ body
 	//- Comments
 	template(data-template="comments")
 		| {{#items}}
-		
 		.comment-item
 			a.comment-profile(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.topLevelComment.snippet.authorProfileImageUrl}});")
 			.comment-name: a(href="{{snippet.topLevelComment.snippet.authorChannelUrl}}", target="_blank") {{snippet.topLevelComment.snippet.authorDisplayName}}
@@ -102,7 +105,7 @@ body
 			.comment-replies
 				| {{#replies.comments}}
 				.comment-item
-					a.comment-profile(href="{{snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.authorProfileImageUrl}});")
+					a.comment-profile-small(href="{{snippet.authorChannelUrl}}", target="_blank", style="background-image: url({{snippet.authorProfileImageUrl}});")
 					.comment-name: a(href="{{snippet.authorChannelUrl}}", target="_blank") {{snippet.authorDisplayName}}
 					.comment-text {{{snippet.textDisplay}}}
 					.comment-meta
@@ -114,7 +117,6 @@ body
 						| {{/snippet.likeCount}}
 				| {{/replies.comments}}
 		.clear
-
 		| {{/items}}
 
 		| {{#nextPageToken}}
@@ -143,3 +145,13 @@ body
 		p
 			| #[i.m-r.icon.ion-thumbsup]/#[i.m-l.m-r.icon.ion-thumbsdown] 
 			| {{custom.likeRatio}} times more likes than dislikes.
+		p
+			strong Description 
+		p
+			| {{{custom.description}}}
+		.info-ui-right
+			| {{#user.items}}
+			a(href="http://youtube.com/channel/{{id}}", target="_blank")
+				strong {{snippet.title}}
+				img.m-l(src="{{snippet.thumbnails.medium.url}}", alt="{{snippet.title}}", width="50", height="50")
+			| {{/user.items}}

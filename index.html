@@ -20,6 +20,7 @@
   </div>
   <div class="items"></div>
   <div class="comment-ui">
+    <p><strong>Comments</strong></p>
     <div class="comment-items"></div>
   </div>
   <div class="close-fullscreen"></div>
@@ -32,16 +33,14 @@
         <div class="video-item-ui">
           <h2 class="video-item-heading">{{snippet.title}}</h2>
           <p><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</p>
-          <p><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</p>
-          <p><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</p>
-          <p> <i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</p>
+          <p><span class="m-r"><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</span><span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</span></p>
           <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
           <p>
             <div class="like-bar">
               <div style="width: {{custom.likeRatioPercent}}%;" class="like-percent"></div>
             </div>
           </p>{{#user.items}}
-          <p><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-r"/><strong>{{snippet.title}}</strong></p>{{/user.items}}
+          <div class="video-item-profile"><a href="http://youtube.com/channel/{{id}}" target="_blank"><strong>{{snippet.title}}</strong><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-l"/></a></div>{{/user.items}}
         </div>
       </div>
     </div>{{/videos}}
@@ -53,7 +52,7 @@
       <div class="comment-meta">{{#snippet.totalReplyCount}}<span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{snippet.totalReplyCount}}</span>{{/snippet.totalReplyCount}}{{#snippet.topLevelComment.snippet.likeCount}}<span class="m-l m-r"><i class="m-r icon ion-thumbsup"></i>{{snippet.topLevelComment.snippet.likeCount}}</span>{{/snippet.topLevelComment.snippet.likeCount}}
       </div>
       <div class="comment-replies">{{#replies.comments}}
-        <div class="comment-item"><a href="{{snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.authorProfileImageUrl}});" class="comment-profile"></a>
+        <div class="comment-item"><a href="{{snippet.authorChannelUrl}}" target="_blank" style="background-image: url({{snippet.authorProfileImageUrl}});" class="comment-profile-small"></a>
           <div class="comment-name"><a href="{{snippet.authorChannelUrl}}" target="_blank">{{snippet.authorDisplayName}}</a></div>
           <div class="comment-text">{{{snippet.textDisplay}}}</div>
           <div class="comment-meta">{{#snippet.likeCount}}<span class="m-r"><i class="m-r icon ion-thumbsup"></i>{{snippet.likeCount}}</span>{{/snippet.likeCount}}
@@ -75,5 +74,8 @@
     </div>
     <p><span class="m-r"><i class="m-r icon ion-eye"></i>{{statistics_formated.viewCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsup clr-success"></i>{{statistics_formated.likeCount}}</span><span class="m-r"><i class="m-r icon ion-thumbsdown clr-danger"></i>{{statistics_formated.dislikeCount}}</span><span class="m-r"><i class="m-r icon ion-ios-chatbubble"></i>{{statistics_formated.commentCount}}</span></p>
     <p><i class="m-r icon ion-thumbsup"></i>/<i class="m-l m-r icon ion-thumbsdown"></i> {{custom.likeRatio}} times more likes than dislikes.</p>
+    <p><strong>Description </strong></p>
+    <p>{{{custom.description}}}</p>
+    <div class="info-ui-right">{{#user.items}}<a href="http://youtube.com/channel/{{id}}" target="_blank"><strong>{{snippet.title}}</strong><img src="{{snippet.thumbnails.medium.url}}" alt="{{snippet.title}}" width="50" height="50" class="m-l"/></a>{{/user.items}}</div>
   </template>
 </body>

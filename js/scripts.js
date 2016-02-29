@@ -99,15 +99,16 @@
         success: function(data) {
           var items;
           items = data.items;
-          console.log(data);
+          console.log("All videos: ", data);
           return $.each(items, function(index, val) {
             return $.ajax({
               url: "https://www.googleapis.com/youtube/v3/videos?id=" + val.id.videoId + "&part=snippet,statistics&key=" + apiKey,
               dataType: "jsonp",
+              async: false,
               success: function(data) {
                 var pos;
                 videoListByKey[val.id.videoId] = data.items[0];
-                videoList.push(data.items[0]);
+                videoList[index] = data.items[0];
                 pos = {
                   state: false,
                   values: {
@@ -144,15 +145,15 @@
       });
       return useVideos = function(videos) {
         var $container, renderVideos, videosAjaxLooped;
-        console.log(videos);
         $container = $(".items");
         $container.html("");
         renderVideos = function() {
-          var data, output, sortVideos, template;
-          sortVideos = function(a, b) {
-            return b.custom.likeRatio - a.custom.likeRatio;
-          };
-          videos.sort(sortVideos);
+
+          /*sortVideos = (a, b) ->
+          					return (b.custom.likeRatio - a.custom.likeRatio)
+          				videos.sort(sortVideos)
+           */
+          var data, output, template;
           data = {
             videos: videos
           };
@@ -185,13 +186,14 @@
           videos[index].statistics_formated.likeCount = videos[index].statistics.likeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.dislikeCount = videos[index].statistics.dislikeCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
           videos[index].statistics_formated.commentCount = videos[index].statistics.commentCount.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+          videos[index].custom.description = videos[index].snippet.description.replace(/\n/g, "<br>");
           return $.ajax({
             url: "https://www.googleapis.com/youtube/v3/channels?id=" + videos[index].snippet.channelId + "&part=snippet&key=" + apiKey,
             dataType: "jsonp",
             async: false,
             success: function(data) {
               videos[index].user = data;
-              console.log(data);
+              console.log("User: ", data);
               $(".loading .progress").css("width", 60 + ((40 / videos.length) * videosAjaxLooped) + "%");
               videosAjaxLooped++;
               if (videosAjaxLooped === videos.length) {
@@ -230,11 +232,13 @@
       $(this).addClass("active").css("z-index", 4000);
       $(this).attr("data-state", "fullscreen");
       $("body").addClass("state-fullscreen");
+      $(this).mousemove();
       return $.ajax({
         url: "https://www.googleapis.com/youtube/v3/commentThreads?videoId=" + videoId + "&part=snippet,replies&order=relevance&maxResults=10&key=" + apiKey,
         dataType: "jsonp",
         success: function(data) {
           var comments, output, template;
+          console.log("Comments: ", data);
           if (data.nextPageToken) {
             commentsNextPageToken = data.nextPageToken;
           } else {
